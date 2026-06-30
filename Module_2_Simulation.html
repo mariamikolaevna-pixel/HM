@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>GAMZIX · Module 02 · Simulation</title>
+<style>
+:root {
+  color-scheme: light;
+  --yellow: #F5CE00;
+  --yellow-soft: #FFF6CC;
+  --yellow-bg: #FFFCED;
+  --black: #0B0B0B;
+  --white: #FFFFFF;
+  --grey-dark: #333333;
+  --grey: #595959;
+  --grey-light: #D9D9D9;
+  --grey-bg: #F5F5F5;
+  --red: #C00000;
+  --green: #2D7A2D;
+  --orange: #B86E00;
+  --font: "Century Gothic", "Avant Garde", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--white); color: var(--black);
+  font-family: var(--font); font-size: 15px; line-height: 1.55;
+}
+.app { max-width: 760px; margin: 0 auto; padding: 0 0 80px 0; }
+
+.hero { background: var(--black); color: var(--white); padding: 36px 32px 32px 32px; }
+.hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 18px; }
+.hero-mod { color: var(--yellow); font-size: 36px; font-weight: bold; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+.hero-title { color: var(--white); font-size: 28px; font-weight: bold; line-height: 1.15; margin-bottom: 14px; }
+.hero-sub { color: var(--white); opacity: 0.7; font-size: 13px; font-style: italic; }
+.strip { height: 8px; background: var(--yellow); }
+
+.view { padding: 28px 32px 0 32px; }
+.view.hidden { display: none; }
+
+.picker-h { font-size: 11px; letter-spacing: 2.5px; font-weight: bold; color: var(--grey); margin-bottom: 14px; }
+.scenarios { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.scenario-card {
+  background: var(--white); border: 2px solid var(--grey-light);
+  padding: 18px 20px; cursor: pointer; transition: all 0.15s; position: relative;
+}
+.scenario-card:hover { border-color: var(--black); }
+.scenario-card.active { border-color: var(--yellow); background: var(--yellow-soft); }
+.scenario-card.active::before { content: "●"; color: var(--yellow); position: absolute; top: 14px; right: 18px; font-size: 18px; }
+.scenario-dept { font-size: 10px; letter-spacing: 2px; color: var(--grey); font-weight: bold; margin-bottom: 6px; }
+.scenario-title { font-size: 18px; font-weight: bold; color: var(--black); margin-bottom: 4px; }
+.scenario-sub { font-size: 13px; color: var(--grey-dark); line-height: 1.5; }
+
+.setup-meta { border: 1px solid var(--grey-light); margin-bottom: 24px; overflow: hidden; }
+.setup-row { display: grid; grid-template-columns: 150px 1fr; border-bottom: 1px solid var(--grey-light); }
+.setup-row:last-child { border-bottom: none; }
+.setup-row-label {
+  background: var(--black); color: var(--yellow); padding: 12px 14px;
+  font-size: 10px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;
+  display: flex; align-items: center;
+}
+.setup-row-value { background: var(--white); padding: 12px 16px; font-size: 14px; line-height: 1.5; }
+.setup-row:nth-child(even) .setup-row-value { background: var(--grey-bg); }
+.setup-intro { background: var(--yellow-soft); border-left: 6px solid var(--yellow); padding: 16px 20px; font-size: 13px; line-height: 1.6; margin-bottom: 28px; }
+.setup-intro-h { font-size: 10px; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; color: var(--black); }
+
+.btn {
+  font-family: var(--font); font-weight: bold; letter-spacing: 1.5px;
+  cursor: pointer; border: none; padding: 14px 28px; font-size: 13px; transition: all 0.15s;
+}
+.btn-primary { background: var(--black); color: var(--yellow); }
+.btn-primary:hover:not(:disabled) { background: #222; }
+.btn-secondary { background: var(--white); color: var(--black); border: 2px solid var(--black); }
+.btn-secondary:hover:not(:disabled) { background: var(--black); color: var(--yellow); }
+.btn-ghost { background: transparent; color: var(--grey); border: 1px solid var(--grey-light); }
+.btn-ghost:hover:not(:disabled) { color: var(--black); border-color: var(--black); }
+.btn-block { display: block; width: 100%; }
+
+.chat-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--grey-bg); border: 1px solid var(--grey-light); margin-bottom: 16px; font-size: 12px; }
+.chat-bar-meta { color: var(--grey); letter-spacing: 0.5px; }
+.chat-bar-meta b { color: var(--black); text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px; }
+.chat-bar-progress { font-size: 11px; color: var(--grey); letter-spacing: 1px; }
+
+.chat-log { padding: 4px 0; margin-bottom: 18px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; flex-direction: column; max-width: 88%; }
+.msg-from { font-size: 10px; letter-spacing: 2px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; color: var(--grey); }
+.msg-body { padding: 12px 16px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word; }
+.msg.olena { align-self: flex-start; }
+.msg.olena .msg-from { color: var(--black); }
+.msg.olena .msg-body { background: var(--white); border: 1px solid var(--grey-light); border-left: 4px solid var(--black); color: var(--black); }
+.msg.hm { align-self: flex-end; }
+.msg.hm .msg-from { color: var(--black); text-align: right; }
+.msg.hm .msg-body { background: var(--yellow); color: var(--black); border: 1px solid var(--black); }
+
+.choices-block { margin: 20px 0 28px 0; padding: 18px 18px 4px 18px; background: var(--yellow-bg); border: 2px solid var(--yellow); }
+.choices-prompt { font-size: 11px; letter-spacing: 2px; color: var(--black); font-weight: bold; margin-bottom: 14px; }
+.choice {
+  background: var(--white); border: 1px solid var(--grey-light);
+  padding: 14px 16px; margin-bottom: 12px; cursor: pointer;
+  font-size: 14px; line-height: 1.5; transition: all 0.12s;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.choice:hover { border-color: var(--black); transform: translateX(2px); }
+.choice-letter { background: var(--black); color: var(--yellow); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0; margin-top: 1px; }
+.choice-text { flex: 1; color: var(--grey-dark); }
+
+.eval-hero { background: var(--black); color: var(--white); padding: 24px 28px; margin-bottom: 24px; }
+.eval-hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 10px; }
+.eval-hero-title { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+.eval-hero-sub { font-size: 13px; opacity: 0.8; }
+
+.eval-score-card { background: var(--yellow); padding: 20px 24px; margin-bottom: 24px; display: flex; gap: 24px; align-items: center; }
+.eval-score-big { font-size: 48px; font-weight: bold; line-height: 1; color: var(--black); }
+.eval-score-label { font-size: 11px; letter-spacing: 2px; color: var(--black); font-weight: bold; margin-bottom: 4px; }
+.eval-score-text { font-size: 14px; color: var(--black); }
+
+.eval-section { margin-bottom: 28px; }
+.eval-section-h { font-size: 13px; letter-spacing: 2px; font-weight: bold; color: var(--black); margin-bottom: 14px; padding-bottom: 6px; border-bottom: 3px solid var(--yellow); }
+
+.criterion-card { background: var(--white); border: 1px solid var(--grey-light); padding: 14px 16px; margin-bottom: 10px; }
+.criterion-head { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
+.criterion-name { font-size: 13px; font-weight: bold; color: var(--black); }
+.criterion-badge { font-size: 10px; font-weight: bold; letter-spacing: 1.5px; padding: 3px 10px; border-radius: 2px; }
+.criterion-badge.strong { background: var(--green); color: var(--white); }
+.criterion-badge.ok { background: var(--orange); color: var(--white); }
+.criterion-badge.weak { background: var(--red); color: var(--white); }
+.criterion-comment { font-size: 13px; line-height: 1.5; color: var(--grey-dark); }
+
+.path-row { display: grid; grid-template-columns: 40px 30px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--grey-light); align-items: start; }
+.path-row:last-child { border-bottom: none; }
+.path-turn { font-size: 10px; letter-spacing: 1.5px; color: var(--grey); font-weight: bold; padding-top: 4px; }
+.path-icon { font-size: 18px; text-align: center; line-height: 1.2; }
+.path-text { font-size: 13px; line-height: 1.5; color: var(--grey-dark); }
+.path-text .quality-tag { display: block; font-size: 11px; font-weight: bold; margin-top: 4px; }
+.path-text .quality-tag.good { color: var(--green); }
+.path-text .quality-tag.ok { color: var(--orange); }
+.path-text .quality-tag.bad { color: var(--red); }
+
+.takeaway-block { background: var(--black); color: var(--white); padding: 20px 24px; margin-top: 28px; }
+.takeaway-h { color: var(--yellow); font-size: 10px; letter-spacing: 2.5px; font-weight: bold; margin-bottom: 10px; }
+.takeaway-text { font-size: 16px; font-weight: bold; line-height: 1.4; }
+
+.eval-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+@media (max-width: 560px) {
+  .hero { padding: 24px 20px; }
+  .hero-mod { font-size: 28px; }
+  .hero-title { font-size: 22px; }
+  .view { padding: 20px 20px 0 20px; }
+  .setup-row { grid-template-columns: 110px 1fr; }
+  .eval-score-card { flex-direction: column; align-items: start; gap: 12px; }
+  .eval-score-big { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div class="hero-tag">GAMZIX HIRING EXCELLENCE · SIMULATION</div>
+    <div class="hero-mod">MODULE 02</div>
+    <div class="hero-title">Kick-off &amp; Vacancy&nbsp;Calibration</div>
+    <div class="hero-sub">Проведи kick-off з Оленою. Конкретно. Реалістично. До кінця.</div>
+  </div>
+  <div class="strip"></div>
+
+  <div id="setupView" class="view">
+    <div class="picker-h">ОБЕРИ ВАКАНСІЮ, ПО ЯКІЙ ХОЧЕШ ПРОВЕСТИ KICK-OFF</div>
+    <div class="scenarios" id="scenarios"></div>
+    <div id="setupCard"></div>
+    <button class="btn btn-primary btn-block" id="startBtn">ПОЧАТИ KICK-OFF →</button>
+  </div>
+
+  <div id="chatView" class="view hidden">
+    <div class="chat-bar">
+      <div class="chat-bar-meta"><b id="chatScenarioLabel"></b> · <span id="chatScenarioSubtitle"></span></div>
+      <div class="chat-bar-progress" id="chatProgress"></div>
+    </div>
+    <div class="chat-log" id="chatLog"></div>
+    <div id="choicesArea"></div>
+    <div style="display: flex; justify-content: center; margin-top: 24px;">
+      <button class="btn btn-ghost" id="restartFromChatBtn" style="padding: 8px 16px; font-size: 11px;">↺ Почати kick-off заново</button>
+    </div>
+  </div>
+
+  <div id="evalView" class="view hidden">
+    <div class="eval-hero">
+      <div class="eval-hero-tag">ФІДБЕК ВІД ОЛЕНИ</div>
+      <div class="eval-hero-title" id="evalScenarioTitle"></div>
+      <div class="eval-hero-sub">Розбір твого kick-off за 4 критеріями</div>
+    </div>
+    <div class="eval-score-card">
+      <div class="eval-score-big" id="evalScoreBig"></div>
+      <div>
+        <div class="eval-score-label">ЯКІСТЬ KICK-OFF</div>
+        <div class="eval-score-text" id="evalScoreText"></div>
+      </div>
+    </div>
+    <div class="eval-section">
+      <div class="eval-section-h">ПО КОЖНОМУ КРИТЕРІЮ</div>
+      <div id="criteriaList"></div>
+    </div>
+    <div class="eval-section">
+      <div class="eval-section-h">ТВІЙ ШЛЯХ — ВІДПОВІДІ ПО ХОДУ KICK-OFF</div>
+      <div id="pathList"></div>
+    </div>
+    <div class="takeaway-block">
+      <div class="takeaway-h">КЛЮЧОВА ДУМКА</div>
+      <div class="takeaway-text" id="takeawayText"></div>
+    </div>
+    <div class="eval-actions">
+      <button class="btn btn-primary" id="restartEvalBtn">↺ ЦЕЙ САМИЙ KICK-OFF ЩЕ РАЗ</button>
+      <button class="btn btn-secondary" id="newScenarioBtn">→ ОБРАТИ ІНШУ ВАКАНСІЮ</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+const CRITERIA = {
+  profile: { name: "Чіткість профілю", desc: "Чи розділив must vs nice, чи дав конкретну ціль ролі, не «просто сильного»" },
+  market: { name: "Калібрування з ринком", desc: "Чи прийняв market data, чи готовий до trade-off (budget / scope / timeline)" },
+  concrete: { name: "Конкретика", desc: "Цифри, slots, дедлайни — не «обговоримо», «знайду час», «потім»" },
+  ownership: { name: "Decision ownership", desc: "Хто фінально вирішує, чи взяв decision на себе, чи розмив на 5 stakeholders" },
+};
+
+const SCENARIOS = {
+
+  // ============ QA ENGINEER ============
+  qa: {
+    dept: "ENGINEERING / QA",
+    label: "Senior QA Engineer",
+    subtitle: "Slot Games team · automation focus",
+    intro: "Тобі потрібен Senior QA Engineer для команди Slot Games. Ти приходиш до Олени на kick-off. Її задача — витягнути з тебе чіткий профіль і не дати піти у «подивимось по ходу».",
+    olenaOpener: "Окей, kick-off по Senior QA. Перш ніж я піду сорсити — давай зафіксуємо. Що це за роль? Для якого продукту, для якої команди, з яким фокусом?",
+    turns: [
+      // T1 role goal — profile
+      {
+        criterion: "profile",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Це Senior QA для Slot Games команди. Через 6 місяців я очікую, що ми перейдемо з ручного тестування RNG на автоматизовані regression suites — це і є success метрика ролі.",
+            olenaNext: "Чітко. З success-метрикою — зручно сорсити. Тоді must-have, до 5. Конкретно — не «знає QA», а «має X production досвід»."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Senior QA, який знає gambling. Буде тестувати те, що ми робимо.",
+            olenaNext: "Це загально. Через 6 місяців — що зміниться, якщо ми його найняли? Якщо нічого конкретного — у нас немає критерію, кого ми шукаємо. Тоді must-have — конкретно, до 5."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Нам потрібен просто сильний QA. Подивимось по ходу, що буде робити.",
+            olenaNext: "«Подивимось по ходу» — це гарантія 2-місячного пошуку. Я не можу сорсити «сильного QA» без розуміння, що ти оцінюєш як «сильний». Тоді must-have — конкретно, до 5."
+          },
+        ]
+      },
+      // T2 must-have — profile
+      {
+        criterion: "profile",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Must: 1) commercial automation (Selenium / Cypress), 3+ роки. 2) REST API testing. 3) Розуміння gambling механік або готовність вчити за 1-2 місяці. 4) English B2+. Усе інше — nice.",
+            olenaNext: "Класно. 4 must, з можливістю донавчити gambling — це збільшує pool. Тепер salary range. Конкретні цифри, не «обговоримо»."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Automation, manual testing, gambling experience, RNG/RTP testing, English, leadership skills бажано.",
+            olenaNext: "6 must — це багато. Половина з них або всі — це профіль unicorn'а. Що з цього ти готовий зрушити у nice, якщо ринок не дасть? Бо без цього ми застрягнемо. Salary range — конкретні цифри."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Все важливо — automation, manual, API, gambling, load testing, security basics. Не можу обрати.",
+            olenaNext: "«Все важливо» = нічого не пріоритет. Це 8-12 тижнів пошуку без результату. Я не можу так сорсити. Salary range — конкретні цифри, не «ринок»."
+          },
+        ]
+      },
+      // T3 salary — market
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Я дивився ринок — $2800-3500 net для Senior QA з automation в gambling. Готовий стартувати з $3000, гнучкість до $3500 для сильного кандидата.",
+            olenaNext: "Окей. Range реалістичний — підтверджую з трьох останніх closed-ролей. Я зараз дам тобі market reality по поточному pool — слухай уважно."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Думаю $2500-3200, але можемо обговорити з кандидатом.",
+            olenaNext: "$2500 для Senior QA з automation у gambling — це нижче ринку. Без гнучкості — pipeline буде з людьми, які кажуть «ок, але я ще шукаю». Я зараз покажу market reality."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Бюджет ще обговорюємо з фінансами. Покажи спочатку CVs — потім порахуємо.",
+            olenaNext: "Без бюджету я не можу робити скринінг proper. Кандидати першим питанням питають range — а я кажу «потім». 50% з них зникають. Я не сорсю без range — повертаюсь, коли він буде."
+          },
+        ]
+      },
+      // T4 market reality — market
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Олено, ти хочеш мені показати market data — давай.",
+            olenaNext: "Ок. Senior QA з automation + gambling experience: 38 людей у Україні, 22 у конкурентів неактивні, 16 активних. З англійською B2+ — 8. Що з цим робимо? Я бачу два варіанти: +15% до salary для активного хедхантингу з конкурентів, або зрушити gambling experience у nice-to-have. Що швидше дає результат?"
+          },
+        ]
+      },
+      // T4b reaction to market
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "8 — мало для 4 тижнів. Я б брав другий варіант — gambling у nice-to-have, але обов'язково automation + API + B2+. Це різко відкриває pool, а gambling донавчиться за 6-8 тижнів.",
+            olenaNext: "Підтримую — pool зростає до ~110 людей. Окей. Тепер процес. Скільки годин на тиждень ти готовий виділити на інтерв'ю — конкретні слоти на 4 тижні вперед."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "8 — це достатньо, давай спочатку поговоримо з ними.",
+            olenaNext: "8 кандидатів = ~4-5 проходять скринінг = ~2-3 до фіналу. Якщо хоч один знімається — у нас немає запасу. Зазвичай це закінчується тим, що ми сидимо ще 6 тижнів. Інтерв'ю-слоти — конкретно, на 4 тижні."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Це усереднено, ринок завжди має більше. Шукай активніше.",
+            olenaNext: "«Шукай активніше» — у мене 8 кваліфікованих людей. Активніше — це сорсити неактивних, що коштує тижні. Я не зміню числа просто тому, що ти не задоволений. Інтерв'ю-слоти — на 4 тижні."
+          },
+        ]
+      },
+      // T5 interview capacity — concrete
+      {
+        criterion: "concrete",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Бронюю tue/thu 14:00-15:30 на 4 тижні вперед. Це 12 годин — 8-10 інтерв'ю при потребі. Переноси узгоджую з тобою за 24 години, не за годину.",
+            olenaNext: "Працює. Звичайно тримати слоти — це і є те, що економить нам 2 тижні. Останнє — хто фінально вирішує? У кого veto?"
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Думаю, 4-5 годин на тиждень. Знайду час, коли будуть кандидати.",
+            olenaNext: "«Знайду час» — це коли я приходжу з кандидатом і тобі немає слотів. Кандидат чекає 1-2 тижні і йде. Можеш ЗАРАЗ забронювати — навіть «холості» слоти краще, ніж їх відсутність. Хто фінально вирішує?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Я зараз у delivery — давай я подивлюсь календар, коли будуть конкретні люди.",
+            olenaNext: "Тоді не зараз kick-off — повертаємось, коли у тебе буде час. Я не можу сорсити, знаючи що кандидатам нічого не запропонувати. Хто фінально вирішує — або ставимо на пауз?"
+          },
+        ]
+      },
+      // T6 decision makers — ownership
+      {
+        criterion: "ownership",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Я як hiring manager. На final присутня Іра (Head of QA) як sanity check, але go/no-go — на мені. Не передаю далі. Якщо потрібен alignment — ескалюю в кімнаті, не після.",
+            olenaNext: "Дякую. Це чіткий kick-off. Маю достатньо, щоб виходити на ринок. Завтра 10:00 — повертаюсь з market refresh по новому профілю."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я + Іра приймемо разом. Можливо ще CTO глянуть на найсильніших.",
+            olenaNext: "Окей. «Можливо CTO» — це означає, що на фіналі один з кандидатів буде чекати 3-5 днів, бо CTO у відрядженні. Спробуй зафіксувати: CTO або у процесі, або взагалі ні."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Я + Іра + CTO + може Тех Лід. Потім подивимось, кого ще доєднати.",
+            olenaNext: "4 stakeholders на final = 2-3 тижні узгоджень = втрачені сильні кандидати. Це класичний паттерн, в який ми вже потрапляли. Я б воліла, щоб ти зафіксував decision-power на 1-2 людях максимум."
+          },
+        ]
+      },
+    ],
+  },
+
+  // ============ LEAD 2D ANIMATOR ============
+  animator: {
+    dept: "ART / ANIMATION",
+    label: "Lead 2D Animator",
+    subtitle: "Slot games · animation pipeline",
+    intro: "Тобі потрібен Lead 2D Animator, який вибудує animation pipeline для нової лінейки slot games і підтягне 2 junior'ів. Ти приходиш на kick-off до Олени.",
+    olenaOpener: "Lead Animator. Перш ніж я піду сорсити — що це за роль і чому саме зараз? Не «нам ще треба людину», а яка реальна ціль.",
+    turns: [
+      // T1 role goal
+      {
+        criterion: "profile",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Це не «ще один аніматор» — це Lead, який вибудує animation pipeline для нашої нової лінейки. Через 6 місяців: 2 нових слоти з consistent animation language + 2 junior'и підтянуті.",
+            olenaNext: "Чітко. З цією метрикою я можу сорсити саме тих, хто будував pipeline, а не просто аніматорів. Тоді must-have — до 5."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Сильний 2D animator з gambling, який буде робити анімацію для наших слотів.",
+            olenaNext: "Це загально. «Сильний» — який саме рівень? «Анімацію» — UI? Character? VFX? Без конкретики я не зможу фільтрувати. Через 6 місяців — що буде інакше? Тоді must-have — до 5."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "У нас зараз багато слотів, не вистачає рук. Треба ще одного аніматора.",
+            olenaNext: "Це не Lead — це Senior. Lead = людина, яка веде інших. Якщо ти шукаєш руки, я б одразу казала що нам потрібно 2 Middle, не 1 Lead. Що ти хочеш насправді? Тоді must-have."
+          },
+        ]
+      },
+      // T2 must-have
+      {
+        criterion: "profile",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Must: 1) Spine 2D або After Effects на production level. 2) 4+ роки commercial у slot games або mobile games. 3) Досвід leading 2-3 людей. 4) Сильний sense timing/easing. Nice: Unity, AE expressions.",
+            olenaNext: "Хороший баланс. Spine OR AE — це принципово розширює pool. Salary range — конкретно."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Spine 2D, After Effects, gambling, leadership, портфоліо сильне.",
+            olenaNext: "«Сильне портфоліо» — це не критерій. Сильне для тебе vs сильне для команди VFX — це різне. Можеш зафіксувати reference set із 3-5 робіт, які для тебе benchmark? Бо інакше відкидатимеш «не наш стиль» без даних. Salary range — конкретно."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Все важливо — Spine, AE, Unity, Houdini для VFX, leadership, UI sense, gambling. Це Lead, він має знати все.",
+            olenaNext: "Це профіль 8-річного Senior Lead у великій студії — їх 3 в Україні і всі у Playtika. Хочеш такого — нам треба $5000+ і 4 місяці пошуку. Що з цього є справді must, а що ти готовий донавчити?"
+          },
+        ]
+      },
+      // T3 salary
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Lead 2D Animator на ринку: $3200-4500 net. Готовий $3500-4200, з гнучкістю до $4500 для сильного кандидата з leadership досвідом.",
+            olenaNext: "Range реалістичний. Тепер market reality."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "$2800-3500. Якщо буде дуже сильний — можливо більше.",
+            olenaNext: "$2800 — це Middle ставка, не Lead. На цей бюджет ти отримаєш або Middle, який претендує на Lead, або Senior без leadership досвіду. Що ти хочеш насправді?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Це залежить від людини. Покажи CVs — побачимо.",
+            olenaNext: "Я не сорсю без range. Перше питання кандидата — «скільки?». Якщо я кажу «потім», 50% зникають. Range — конкретний."
+          },
+        ]
+      },
+      // T4 market reality
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Покажи market data.",
+            olenaNext: "Lead 2D Animator з gambling та Spine production: 11 людей у Україні, 4 активних. Розширюємо на mobile/game studios (без gambling): +25-30 з різним досвідом, але без gambling-фону. Або підняти salary на 20% для активного хедхантингу з gambling. Який варіант?"
+          },
+        ]
+      },
+      // T4b market reaction
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Розширюємо на mobile/game studios, gambling зрушуємо у nice-to-have. Швидше і ширший pool сильних leadership-людей. Salary поки тримаємо.",
+            olenaNext: "Згоден з логікою — leadership важливіше за domain, домен донавчиться. Тепер інтерв'ю-слоти, на 4 тижні."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "11 — це ж нормально. Давай спочатку поговоримо з ними.",
+            olenaNext: "З 11 — 4 активні. З 4 активних — половина не пройде скринінг. У нас залишається 2 фіналісти. Якщо один знімається — все. Краще трохи розширити заздалегідь. Слоти?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Mobile — не наш domain, там зовсім інший стиль. Хочу тільки gambling. Шукай.",
+            olenaNext: "Mobile games і gambling — animation pipeline дуже схожий. Це не «зовсім інший стиль» — це міф. Якщо тримаєш цю позицію — готуйся до 4-місячного пошуку. Слоти?"
+          },
+        ]
+      },
+      // T5 interview slots
+      {
+        criterion: "concrete",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Бронюю середи 11:00-13:00 і п'ятниці 15:00-17:00. Це фінали — окремо. Tomorrow notice мінімум. Переноси — 24 години, не на день.",
+            olenaNext: "Чітко. Останнє — хто фінально вирішує?"
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Десь 3-4 години на тиждень — знайду, коли треба.",
+            olenaNext: "«Знайду» = кандидат чекає тиждень = йде до Evoplay. Можеш забронювати слоти ЗАРАЗ? Хто вирішує?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "У нас зараз релізи. Давай по факту, коли будуть.",
+            olenaNext: "Тоді у нас немає kick-off — у нас «коли буде час». Я не виходжу на ринок з цим. Хто вирішує — або пауз?"
+          },
+        ]
+      },
+      // T6 decision makers
+      {
+        criterion: "ownership",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Я як Art Director. На final — Maks (Senior Animator) подивиться на технічну частину. Decision — за мною. Не виношу у Slack на голосування — це моя зона.",
+            olenaNext: "Дякую. Це чіткий kick-off. До завтра — повертаюсь з market refresh по новому профілю (mobile + game studios)."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я і Maks разом. Можливо CEO на дуже Senior.",
+            olenaNext: "«Можливо CEO» — це додатковий етап і 3-5 днів. Зафіксуй: або CEO у процесі, або ні. Я не люблю surprise-stakeholders."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Я, Maks, CEO, можливо Head of Product. Потім розберемось.",
+            olenaNext: "4 стейкхолдери на final = ми втратимо найсильніших на узгодженнях. Це повторення pattern, в який ми вже потрапляли."
+          },
+        ]
+      },
+    ],
+  },
+
+  // ============ CUSTOMER SUPPORT LEAD ============
+  support: {
+    dept: "OPERATIONS / SUPPORT",
+    label: "Customer Support Lead",
+    subtitle: "B2B operator support team",
+    intro: "Тобі потрібен Support Lead для B2B operator support команди (8 людей). Ти приходиш на kick-off до Олени як Head of Operations.",
+    olenaOpener: "Support Lead. Перш ніж я піду сорсити — чому Lead, не Senior? Що буде інакше через 6 місяців?",
+    turns: [
+      // T1 role goal
+      {
+        criterion: "profile",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Поточна команда (8 людей) працює реактивно. Через 6 місяців я очікую: proactive incident management, time-to-resolve −30%, ставлять tier 2/3 escalation процес з технічною командою.",
+            olenaNext: "Це Lead-завдання, а не Senior. Чітко. Тоді must-have — до 5."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Lead, який буде керувати 8 людьми і робити, щоб все працювало.",
+            olenaNext: "«Все працювало» — це не метрика. «Керувати» — як саме? Без конкретики я не знаю, кого фільтрувати. Тоді must-have — конкретно."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "У нас зараз багато операторів-клієнтів. Треба сильної людини, яка розрулить.",
+            olenaNext: "Це Senior IC, не Lead. Якщо ти просто хочеш «розрулить» — нам не потрібен Lead, нам потрібен ще один Senior support. Який варіант?"
+          },
+        ]
+      },
+      // T2 must-have
+      {
+        criterion: "profile",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Must: 1) 3+ роки leading B2B support team у gambling або fintech. 2) Ownership SLA management. 3) Досвід з incident management tools (PagerDuty / Opsgenie). 4) English C1+ — основний канал з операторами. 5) Тісна робота з технічною командою.",
+            olenaNext: "5 must, всі релевантні. Можливо C1 трохи високо — B2-strong теж дасть результат, але домовимось ще раз на фінальному calibration. Salary."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "B2B досвід, leadership, gambling, англійська, операційне мислення.",
+            olenaNext: "Last item — «операційне мислення» — це не критерій, який я можу скринити. Можеш переформулювати у поведінкове? Salary range."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Лідерські якості, gambling, англійська, технічний фон, soft skills, communication, мульти-таскінг, стрес-стійкість.",
+            olenaNext: "8 пунктів — це профіль, який не існує. Половина — soft skills, які перевіряються на інтерв'ю, не на скринінгу. Зведи до 5 must, конкретно перевірних. Salary."
+          },
+        ]
+      },
+      // T3 salary
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Support Lead для B2B gambling — $2400-3200 net. Готовий $2700 стартова, гнучкість до $3200 для сильного.",
+            olenaNext: "Range ок. Market reality."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "$2000-2800. Думаю, цього достатньо.",
+            olenaNext: "$2000 для Lead — це Middle ставка. Будуть кандидати, які кивнуть і паралельно шукатимуть. Це створює fake pipeline."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Залежить від людини. Покажи спочатку резюме.",
+            olenaNext: "Без range кандидати зникають на першому дзвінку. Я не сорсю без числа."
+          },
+        ]
+      },
+      // T4 market reality
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Показуй.",
+            olenaNext: "Support Leads з B2B gambling + C1 English — 19 у Україні, 12 активні. З досвідом incident management tools — 6 з них. Опції: incident tools — у nice-to-have, донавчиш за 1-2 місяці (відкриває pool до 12). Або +15-20% salary для активного хедхантингу. Що обираєш?"
+          },
+        ]
+      },
+      // T4b reaction
+      {
+        criterion: "market",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Incident management tools — переношу у nice-to-have. Це інструмент, який можна вивчити за 1-2 місяці. Salary тримаємо. Дає pool 12 активних — це нормально для 4-6 тижневого пошуку.",
+            olenaNext: "Згодна. Tool — це навичка, leadership — це людина. Інтерв'ю-слоти?"
+          },
+          {
+            quality: "ok", score: 1,
+            text: "6 — це достатньо, давай поговоримо з ними.",
+            olenaNext: "6 = 3 після скринінгу = 1-2 фінали = high risk single point of failure. Я б воліла трохи розширити заздалегідь. Слоти?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Це усереднено. Якщо шукати краще — є більше.",
+            olenaNext: "Я можу сорсити неактивних — це 2-3 тижні додаткової роботи з низькою response rate. Слоти?"
+          },
+        ]
+      },
+      // T5 slots
+      {
+        criterion: "concrete",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Бронюю понеділки 16:00-17:30 і четверги 14:00-15:30. 6 годин на тиждень — 4-5 інтерв'ю. Переноси — за 24 години.",
+            olenaNext: "Працює. Останнє — decision makers."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Думаю, 4 години на тиждень знайду.",
+            olenaNext: "«Знайду» — це коли я приходжу з кандидатом, а тебе немає. Можеш забронювати ЗАРАЗ? Decision makers?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Я багато у мітингах. По факту, коли будуть кандидати.",
+            olenaNext: "Тоді у нас немає kick-off. Я не виходжу на ринок без слотів. Decision makers — або пауз?"
+          },
+        ]
+      },
+      // T6 decision makers
+      {
+        criterion: "ownership",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Я як Head of Operations. На final — Дмитро (Head of Customer Success) як sanity check. Decision — за мною. Не виношу на «всю команду подивитись» — це уповільнює і розмиває ownership.",
+            olenaNext: "Дякую. Чіткий kick-off. До завтра — market refresh з новим профілем."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я і Дмитро разом. Може CEO одного-двох гляне.",
+            olenaNext: "«Може CEO» — це невизначеність, яка коштує тижні. Або CEO у процесі, або ні."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Я, Дмитро, CEO, Sales Lead — всі мають бачити. Потім вирішимо.",
+            olenaNext: "4 stakeholders на final = найсильніші ідуть, бо не дочекаються. Це pattern, в який ми вже потрапляли."
+          },
+        ]
+      },
+    ],
+  },
+};
+
+// ============================================================
+// STATE
+// ============================================================
+
+const STORAGE_KEY = "gamzix_m2_sim_v1";
+
+let state = {
+  scenario: "qa",
+  view: "setup",
+  step: 0,
+  messages: [],
+  choices: [],
+};
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    if (saved.scenario && saved.view) {
+      state = { ...state, ...saved };
+    }
+  } catch (e) {}
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function resetSession(scenario) {
+  state.scenario = scenario || state.scenario;
+  state.view = "setup";
+  state.step = 0;
+  state.messages = [];
+  state.choices = [];
+  saveState();
+  render();
+}
+
+function el(id) { return document.getElementById(id); }
+function escapeHtml(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function renderScenarios() {
+  el("scenarios").innerHTML = Object.entries(SCENARIOS).map(([key, s]) => `
+    <div class="scenario-card ${state.scenario === key ? "active" : ""}" data-scenario="${key}">
+      <div class="scenario-dept">${s.dept}</div>
+      <div class="scenario-title">${escapeHtml(s.label)}</div>
+      <div class="scenario-sub">${escapeHtml(s.subtitle)}</div>
+    </div>
+  `).join("");
+  document.querySelectorAll(".scenario-card").forEach(card => {
+    card.addEventListener("click", () => {
+      state.scenario = card.dataset.scenario;
+      saveState();
+      render();
+    });
+  });
+}
+
+function renderSetup() {
+  const s = SCENARIOS[state.scenario];
+  renderScenarios();
+  el("setupCard").innerHTML = `
+    <div class="setup-meta">
+      <div class="setup-row">
+        <div class="setup-row-label">Хто Олена</div>
+        <div class="setup-row-value">Senior Recruiter, веде kick-off і притискає до конкретики</div>
+      </div>
+      <div class="setup-row">
+        <div class="setup-row-label">Хто ти</div>
+        <div class="setup-row-value">Хайринг менеджер у GAMZIX</div>
+      </div>
+      <div class="setup-row">
+        <div class="setup-row-label">Як це працює</div>
+        <div class="setup-row-value">7 кроків kick-off. На кожному — Олена ставить питання, ти обираєш одну з 3 відповідей. У кінці — фідбек за 4 критеріями.</div>
+      </div>
+      <div class="setup-row">
+        <div class="setup-row-label">Тривалість</div>
+        <div class="setup-row-value">~10 хвилин</div>
+      </div>
+    </div>
+    <div class="setup-intro">
+      <div class="setup-intro-h">СЦЕНАРІЙ</div>
+      ${escapeHtml(s.intro)}
+    </div>
+  `;
+}
+
+function renderChat() {
+  const s = SCENARIOS[state.scenario];
+  el("chatScenarioLabel").textContent = s.label;
+  el("chatScenarioSubtitle").textContent = s.subtitle;
+  el("chatProgress").textContent = `КРОК ${Math.min(state.step + 1, s.turns.length)} / ${s.turns.length}`;
+
+  const log = el("chatLog");
+  log.innerHTML = "";
+  state.messages.forEach(m => {
+    const msg = document.createElement("div");
+    msg.className = "msg " + (m.role === "olena" ? "olena" : "hm");
+    msg.innerHTML = `
+      <div class="msg-from">${m.role === "olena" ? "Олена" : "Ти (хайринг менеджер)"}</div>
+      <div class="msg-body">${escapeHtml(m.text)}</div>
+    `;
+    log.appendChild(msg);
+  });
+
+  const choicesArea = el("choicesArea");
+  if (state.step >= s.turns.length) {
+    choicesArea.innerHTML = `
+      <div style="text-align: center; margin-top: 24px;">
+        <button class="btn btn-primary" id="seeFeedbackBtn">↓ ОТРИМАТИ ФІДБЕК ВІД ОЛЕНИ ↓</button>
+      </div>
+    `;
+    el("seeFeedbackBtn").addEventListener("click", showEvaluation);
+    return;
+  }
+
+  const turn = s.turns[state.step];
+  const letters = ["A", "B", "C"];
+
+  // T4 in qa/animator/support is single-option ("показуй") — handle gracefully
+  if (turn.choices.length === 1) {
+    choicesArea.innerHTML = `
+      <div class="choices-block">
+        <div class="choices-prompt">ТВОЯ ВІДПОВІДЬ</div>
+        <div class="choice" data-choice="0">
+          <div class="choice-letter">▸</div>
+          <div class="choice-text">${escapeHtml(turn.choices[0].text)}</div>
+        </div>
+      </div>
+    `;
+  } else {
+    choicesArea.innerHTML = `
+      <div class="choices-block">
+        <div class="choices-prompt">ЯК ТИ ВІДПОВІДАЄШ ОЛЕНІ?</div>
+        ${turn.choices.map((c, i) => `
+          <div class="choice" data-choice="${i}">
+            <div class="choice-letter">${letters[i]}</div>
+            <div class="choice-text">${escapeHtml(c.text)}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  document.querySelectorAll(".choice").forEach(div => {
+    div.addEventListener("click", () => {
+      const idx = parseInt(div.dataset.choice, 10);
+      handleChoice(idx);
+    });
+  });
+
+  log.scrollTop = log.scrollHeight;
+  setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }, 50);
+}
+
+function renderEvalView() {
+  const s = SCENARIOS[state.scenario];
+  el("evalScenarioTitle").textContent = s.label;
+
+  // Compute total (skipping single-choice forced moves)
+  const scoredChoices = state.choices.filter(c => c.maxScore > 0);
+  const totalMax = scoredChoices.reduce((sum, c) => sum + c.maxScore, 0);
+  const totalScore = scoredChoices.reduce((sum, c) => sum + c.score, 0);
+  const pct = totalMax > 0 ? Math.round((totalScore / totalMax) * 100) : 0;
+
+  let overallText = "";
+  if (pct >= 80) overallText = "Це сильний kick-off. Конкретний профіль, готовність до калібрування, чіткий decision-ownership. Ринок отримає від тебе зрозумілий запит — і дасть релевантний pipeline.";
+  else if (pct >= 50) overallText = "Серединний kick-off. Є моменти, де ти дав конкретику, є — де відмахнувся «обговоримо». Подивись по критеріях, де саме просідаєш.";
+  else overallText = "Цей kick-off створить тобі 6-10 тижнів пошуку. Подивись варіанти C і B — це типові паттерни, які ламають recruitment. Спробуй ще раз.";
+
+  el("evalScoreBig").innerHTML = `${pct}<span style="font-size: 20px;">%</span>`;
+  el("evalScoreText").textContent = overallText;
+
+  const critScores = { profile: [], market: [], concrete: [], ownership: [] };
+  scoredChoices.forEach(c => {
+    if (critScores[c.criterion]) critScores[c.criterion].push(c.score);
+  });
+
+  el("criteriaList").innerHTML = Object.entries(CRITERIA).map(([key, c]) => {
+    const scores = critScores[key] || [];
+    if (scores.length === 0) return "";
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    let badge, badgeClass, comment;
+    if (avg >= 2.5) { badge = "STRONG"; badgeClass = "strong"; comment = goodComment(key); }
+    else if (avg >= 1.5) { badge = "OK"; badgeClass = "ok"; comment = okComment(key); }
+    else { badge = "WEAK"; badgeClass = "weak"; comment = weakComment(key); }
+    return `
+      <div class="criterion-card">
+        <div class="criterion-head">
+          <div class="criterion-name">${c.name}</div>
+          <div class="criterion-badge ${badgeClass}">${badge}</div>
+        </div>
+        <div class="criterion-comment">${escapeHtml(comment)}</div>
+      </div>
+    `;
+  }).join("");
+
+  el("pathList").innerHTML = state.choices.map((c, i) => {
+    const icon = c.quality === "good" ? "✓" : (c.quality === "ok" ? "~" : (c.quality === "neutral" ? "▸" : "✗"));
+    const annotation = pathAnnotation(c.quality, c.criterion);
+    return `
+      <div class="path-row">
+        <div class="path-turn">КРОК ${i+1}</div>
+        <div class="path-icon" style="color: var(--${c.quality==='good'?'green':c.quality==='ok'?'orange':c.quality==='neutral'?'grey':'red'});">${icon}</div>
+        <div class="path-text">
+          ${escapeHtml(c.text)}
+          ${c.quality !== 'neutral' ? `<span class="quality-tag ${c.quality==='good'?'good':c.quality==='ok'?'ok':'bad'}">${annotation}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  el("takeawayText").textContent = takeawayText(pct);
+}
+
+function goodComment(key) {
+  return ({
+    profile: "Ти зайшов з конкретним профілем: must vs nice розділені, success-метрики ролі сформульовані, не «просто сильного». З таким kick-off рекрутер може почати ефективно сорсити з першого дня.",
+    market: "Ти прийняв market data як факт, а не аргументував з ним. Готовий до trade-offs (budget / scope / timeline) — і обираєш конкретний варіант у кімнаті, не «давай подумаємо тиждень». Це і є зрілість.",
+    concrete: "Конкретні цифри, конкретні слоти, конкретні дедлайни. Не «обговоримо», «знайду час», «потім». Це економить тижні комунікації і дає команді чіткий план.",
+    ownership: "Ти взяв decision-power на себе і чітко описав, хто ще у процесі та з якою роллю. Без розмитих «можливо ще CEO глянуть». Це швидкий найм без узгоджень.",
+  })[key];
+}
+function okComment(key) {
+  return ({
+    profile: "Профіль частково сформульований, але є місця, де ти кажеш загально («сильний», «портфоліо хороше»). Подумай: як це описати поведінково? Що саме «сильний»? Тоді recruiter зможе фільтрувати.",
+    market: "Ти не зовсім сперечаєшся з market data, але й не одразу приймаєш trade-offs. У наступний раз — приймай у кімнаті, не «давай ще подумаю». Дані не зміняться через тиждень.",
+    concrete: "Подекуди ти дав конкретику, подекуди — «знайду час», «обговоримо». Recruiter не може планувати без чисел. Зафіксуй slots ЗАРАЗ — навіть якщо не наповниш всі.",
+    ownership: "Ти близький до чіткості, але залишив «можливо CEO», «може Sales Lead». Кожне «можливо» = додатковий тиждень узгоджень. Зафіксуй: або у процесі, або ні.",
+  })[key];
+}
+function weakComment(key) {
+  return ({
+    profile: "Профіль не сформульований — ти йшов в «подивимось по ходу», «просто сильного», «все важливо». Recruiter не може сорсити з цього. Це гарантована 2-місячна вакансія без результату.",
+    market: "Ти відмахнувся від market data — «це усереднено», «шукай активніше», «у нас знайдеться». Дані не зникнуть від того, що ти їх ігноруєш. Просто пошук затягнеться на 6-10 тижнів.",
+    concrete: "Ти оперуєш у площині «потім», «знайду», «по факту». Без числа і слота kick-off не відбувся. Це не партнерська позиція з recruitment'ом — це передача м'яча.",
+    ownership: "Ти розмив decision-power на 4+ людей. На фіналі це означає тижні узгоджень. Сильні кандидати у цей час йдуть у конкурента.",
+  })[key];
+}
+
+function pathAnnotation(quality, criterion) {
+  if (quality === "good") return ({
+    profile: "✓ Конкретний профіль",
+    market: "✓ Прийняв market data",
+    concrete: "✓ Конкретно: цифри / slots",
+    ownership: "✓ Чіткий decision-power",
+  })[criterion] || "✓ Сильно";
+  if (quality === "ok") return ({
+    profile: "~ Частково розмитий профіль",
+    market: "~ Часткове прийняття data",
+    concrete: "~ «Знайду час» замість slot",
+    ownership: "~ Розмитий decision",
+  })[criterion] || "~ Серединно";
+  return ({
+    profile: "✗ «По ходу» / «просто сильний»",
+    market: "✗ Ігнор market data",
+    concrete: "✗ Без конкретики",
+    ownership: "✗ Розмив на N stakeholders",
+  })[criterion] || "✗ Слабко";
+}
+
+function takeawayText(pct) {
+  if (pct >= 80) return "Kick-off — це угода з ринком, не з recruiter. Ти зробив угоду конкретною. З нею рекрутер може почати працювати того ж дня.";
+  if (pct >= 50) return "Kick-off зекономить тижні, якщо проведений до кінця. У тебе є місця, де ти зупинився на «подивимось» — саме там твоя точка зростання.";
+  return "Kick-off — це не формальність. Це 20 хвилин роботи зараз, які економлять 3-8 тижнів пошуку. Пройди ще раз — цього разу обирай конкретику навіть коли страшно зафіксуватись.";
+}
+
+function render() {
+  el("setupView").classList.toggle("hidden", state.view !== "setup");
+  el("chatView").classList.toggle("hidden", state.view !== "chat");
+  el("evalView").classList.toggle("hidden", state.view !== "eval");
+  if (state.view === "setup") renderSetup();
+  if (state.view === "chat") renderChat();
+  if (state.view === "eval") renderEvalView();
+}
+
+function startSession() {
+  const s = SCENARIOS[state.scenario];
+  state.view = "chat";
+  state.step = 0;
+  state.messages = [{ role: "olena", text: s.olenaOpener }];
+  state.choices = [];
+  saveState();
+  render();
+}
+
+function handleChoice(idx) {
+  const s = SCENARIOS[state.scenario];
+  const turn = s.turns[state.step];
+  const choice = turn.choices[idx];
+
+  // For single-option ("forced") turns, mark as neutral and don't score
+  const isForced = turn.choices.length === 1;
+  state.choices.push({
+    turn: state.step,
+    choiceIdx: idx,
+    text: choice.text,
+    quality: isForced ? "neutral" : choice.quality,
+    score: isForced ? 0 : choice.score,
+    maxScore: isForced ? 0 : 3,
+    criterion: turn.criterion,
+  });
+
+  state.messages.push({ role: "hm", text: choice.text });
+  state.messages.push({ role: "olena", text: choice.olenaNext });
+
+  state.step += 1;
+  saveState();
+  render();
+}
+
+function showEvaluation() {
+  state.view = "eval";
+  saveState();
+  render();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadState();
+  render();
+
+  el("startBtn").addEventListener("click", startSession);
+  el("restartFromChatBtn").addEventListener("click", () => {
+    if (confirm("Почати kick-off заново? Поточний прогрес буде втрачено.")) {
+      resetSession(state.scenario);
+    }
+  });
+  el("restartEvalBtn").addEventListener("click", () => { resetSession(state.scenario); });
+  el("newScenarioBtn").addEventListener("click", () => { resetSession(); });
+});
+</script>
+</body>
+</html>
