@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Gamzix Module 4 Simulation",
+  "schemaVersion": 1,
+  "description": "GAMZIX Hiring Excellence — Module 4 Feedback Flashcards Drill. Простий швидкий тренажер: 10 реальних рядків фідбеку з реальних інтерв'ю. На кожному хайринг менеджер тапає одну з 3 категорій (STRONG / WEAK / BIAS), миттєво отримує пояснення з прикладами. У кінці — breakdown по категоріях + поради, що саме треба потренувати. ~3 хвилини практики."
+}
+</script>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>GAMZIX · Module 04 · Feedback Drill</title>
+<style>
+:root {
+  color-scheme: light;
+  --yellow: #F5CE00;
+  --yellow-soft: #FFF6CC;
+  --yellow-bg: #FFFCED;
+  --black: #0B0B0B;
+  --white: #FFFFFF;
+  --grey-dark: #333333;
+  --grey: #595959;
+  --grey-light: #D9D9D9;
+  --grey-bg: #F5F5F5;
+  --red: #C00000;
+  --red-bg: #FFE5E5;
+  --green: #2D7A2D;
+  --green-bg: #E6F4E6;
+  --orange: #B86E00;
+  --orange-bg: #FFF1D9;
+  --font: "Century Gothic", "Avant Garde", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--white); color: var(--black);
+  font-family: var(--font); font-size: 15px; line-height: 1.55;
+}
+.app { max-width: 720px; margin: 0 auto; padding: 0 0 60px 0; }
+
+.hero { background: var(--black); color: var(--white); padding: 32px 32px 28px 32px; }
+.hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 16px; }
+.hero-mod { color: var(--yellow); font-size: 32px; font-weight: bold; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+.hero-title { color: var(--white); font-size: 26px; font-weight: bold; line-height: 1.15; margin-bottom: 12px; }
+.hero-sub { color: var(--white); opacity: 0.7; font-size: 13px; font-style: italic; }
+.strip { height: 8px; background: var(--yellow); }
+
+.view { padding: 28px 32px 0 32px; }
+.view.hidden { display: none; }
+
+/* SETUP */
+.setup-intro {
+  background: var(--yellow-soft); border-left: 6px solid var(--yellow);
+  padding: 18px 22px; font-size: 14px; line-height: 1.6; margin-bottom: 24px;
+}
+.setup-intro-h { font-size: 10px; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; color: var(--black); }
+
+.categories-explainer {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 28px;
+}
+.cat-row {
+  display: grid; grid-template-columns: 110px 1fr; gap: 14px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--grey-light);
+}
+.cat-row:last-child { border-bottom: none; }
+.cat-badge {
+  text-align: center; padding: 8px 0;
+  font-size: 12px; letter-spacing: 2px; font-weight: bold;
+}
+.cat-badge.strong { background: var(--green); color: var(--white); }
+.cat-badge.weak { background: var(--orange); color: var(--white); }
+.cat-badge.bias { background: var(--red); color: var(--white); }
+.cat-desc { font-size: 13px; line-height: 1.5; color: var(--grey-dark); }
+
+/* BUTTONS */
+.btn {
+  font-family: var(--font); font-weight: bold; letter-spacing: 1.5px;
+  cursor: pointer; border: none; padding: 14px 28px; font-size: 13px; transition: all 0.15s;
+}
+.btn-primary { background: var(--black); color: var(--yellow); }
+.btn-primary:hover:not(:disabled) { background: #222; }
+.btn-secondary { background: var(--white); color: var(--black); border: 2px solid var(--black); }
+.btn-secondary:hover:not(:disabled) { background: var(--black); color: var(--yellow); }
+.btn-ghost { background: transparent; color: var(--grey); border: 1px solid var(--grey-light); }
+.btn-ghost:hover:not(:disabled) { color: var(--black); border-color: var(--black); }
+.btn-block { display: block; width: 100%; }
+
+/* DRILL */
+.drill-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 18px;
+}
+.drill-count {
+  font-size: 14px; font-weight: bold;
+  color: var(--black); letter-spacing: 1px;
+}
+.drill-count-progress {
+  display: inline-block;
+  width: 200px; height: 6px;
+  background: var(--grey-light);
+  position: relative; margin-left: 10px;
+  vertical-align: middle;
+}
+.drill-count-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: var(--yellow);
+  transition: width 0.3s;
+}
+.drill-score {
+  font-size: 12px; color: var(--grey); letter-spacing: 1px;
+}
+
+.feedback-card {
+  background: var(--white);
+  border: 2px solid var(--black);
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  position: relative;
+  min-height: 120px;
+  display: flex; align-items: center;
+}
+.feedback-card-label {
+  position: absolute; top: -12px; left: 20px;
+  background: var(--yellow);
+  padding: 3px 10px;
+  font-size: 10px; letter-spacing: 2px; font-weight: bold;
+  color: var(--black);
+}
+.feedback-text {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--black);
+  font-style: italic;
+}
+.feedback-text::before { content: '«'; color: var(--yellow); font-size: 22px; font-style: normal; margin-right: 4px; }
+.feedback-text::after { content: '»'; color: var(--yellow); font-size: 22px; font-style: normal; margin-left: 4px; }
+
+/* CHOICE BUTTONS */
+.choices {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-bottom: 18px;
+}
+.choice-btn {
+  background: var(--white);
+  border: 2px solid var(--grey-light);
+  padding: 18px 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+.choice-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.choice-btn:disabled { cursor: default; }
+.choice-btn-icon { font-size: 22px; line-height: 1; margin-bottom: 6px; display: block; }
+.choice-btn-label { font-size: 12px; letter-spacing: 2px; font-weight: bold; color: var(--black); }
+
+.choice-btn.strong { border-color: var(--green); }
+.choice-btn.strong:hover:not(:disabled) { background: var(--green-bg); }
+.choice-btn.weak { border-color: var(--orange); }
+.choice-btn.weak:hover:not(:disabled) { background: var(--orange-bg); }
+.choice-btn.bias { border-color: var(--red); }
+.choice-btn.bias:hover:not(:disabled) { background: var(--red-bg); }
+
+.choice-btn.dim { opacity: 0.35; }
+.choice-btn.selected.strong { background: var(--green); border-color: var(--green); }
+.choice-btn.selected.strong .choice-btn-label { color: var(--white); }
+.choice-btn.selected.strong .choice-btn-icon { color: var(--white); }
+.choice-btn.selected.weak { background: var(--orange); border-color: var(--orange); }
+.choice-btn.selected.weak .choice-btn-label { color: var(--white); }
+.choice-btn.selected.weak .choice-btn-icon { color: var(--white); }
+.choice-btn.selected.bias { background: var(--red); border-color: var(--red); }
+.choice-btn.selected.bias .choice-btn-label { color: var(--white); }
+.choice-btn.selected.bias .choice-btn-icon { color: var(--white); }
+
+.choice-btn.show-correct {
+  border-width: 3px;
+  position: relative;
+}
+.choice-btn.show-correct::after {
+  content: "←";
+  position: absolute; right: 8px; top: 8px;
+  color: var(--green); font-weight: bold;
+}
+
+/* EXPLANATION */
+.explanation {
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  border-left: 6px solid var(--grey);
+  font-size: 13px; line-height: 1.6;
+}
+.explanation.correct { background: var(--green-bg); border-color: var(--green); }
+.explanation.wrong { background: var(--red-bg); border-color: var(--red); }
+.explanation-h {
+  font-size: 11px; letter-spacing: 2px; font-weight: bold;
+  margin-bottom: 6px;
+}
+.explanation.correct .explanation-h { color: var(--green); }
+.explanation.wrong .explanation-h { color: var(--red); }
+.explanation-body { color: var(--grey-dark); }
+.explanation-body strong { color: var(--black); }
+
+.next-row { display: flex; justify-content: flex-end; }
+
+/* RESULTS */
+.results-hero { background: var(--black); color: var(--white); padding: 24px 28px; margin-bottom: 24px; }
+.results-hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 10px; }
+.results-hero-title { font-size: 22px; font-weight: bold; }
+
+.score-card { background: var(--yellow); padding: 20px 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; }
+.score-big { font-size: 56px; font-weight: bold; line-height: 1; color: var(--black); }
+.score-big-sub { font-size: 22px; }
+.score-label { font-size: 11px; letter-spacing: 2px; color: var(--black); font-weight: bold; margin-bottom: 4px; }
+.score-text { font-size: 14px; color: var(--black); }
+
+.breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
+.breakdown-cell {
+  background: var(--white); border: 1px solid var(--grey-light);
+  padding: 14px 12px; text-align: center;
+}
+.breakdown-name { font-size: 10px; letter-spacing: 2px; font-weight: bold; color: var(--grey); margin-bottom: 6px; }
+.breakdown-score { font-size: 24px; font-weight: bold; color: var(--black); line-height: 1; margin-bottom: 4px; }
+.breakdown-bar { height: 4px; background: var(--grey-light); margin-top: 8px; position: relative; }
+.breakdown-bar-fill { height: 100%; transition: width 0.4s; }
+.breakdown-bar-fill.strong { background: var(--green); }
+.breakdown-bar-fill.ok { background: var(--orange); }
+.breakdown-bar-fill.weak { background: var(--red); }
+
+.section-h { font-size: 13px; letter-spacing: 2px; font-weight: bold; color: var(--black); margin-bottom: 14px; padding-bottom: 6px; border-bottom: 3px solid var(--yellow); }
+
+.insight-card {
+  background: var(--white); border: 1px solid var(--grey-light);
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.insight-card-h { font-size: 13px; font-weight: bold; color: var(--black); margin-bottom: 6px; }
+.insight-card-body { font-size: 13px; line-height: 1.55; color: var(--grey-dark); }
+
+.takeaway-block { background: var(--black); color: var(--white); padding: 20px 24px; margin-top: 24px; }
+.takeaway-h { color: var(--yellow); font-size: 10px; letter-spacing: 2.5px; font-weight: bold; margin-bottom: 10px; }
+.takeaway-text { font-size: 16px; font-weight: bold; line-height: 1.4; }
+
+.results-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+@media (max-width: 560px) {
+  .hero { padding: 24px 20px; }
+  .hero-mod { font-size: 28px; }
+  .hero-title { font-size: 22px; }
+  .view { padding: 20px 20px 0 20px; }
+  .feedback-text { font-size: 15px; }
+  .choices { gap: 6px; }
+  .choice-btn { padding: 14px 6px; }
+  .choice-btn-label { font-size: 11px; letter-spacing: 1px; }
+  .score-card { flex-direction: column; align-items: start; gap: 12px; }
+  .score-big { font-size: 42px; }
+  .cat-row { grid-template-columns: 90px 1fr; gap: 10px; }
+  .drill-count-progress { width: 120px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div class="hero-tag">GAMZIX HIRING EXCELLENCE · DRILL</div>
+    <div class="hero-mod">MODULE 04</div>
+    <div class="hero-title">Feedback Flashcards</div>
+    <div class="hero-sub">10 рядків фідбеку · оціни кожен · ~3 хвилини</div>
+  </div>
+  <div class="strip"></div>
+
+  <!-- SETUP -->
+  <div id="setupView" class="view">
+    <div class="setup-intro">
+      <div class="setup-intro-h">ЯК ЦЕ ПРАЦЮЄ</div>
+      Покажу 10 рядків фідбеку, які реально пишуть хайринг менеджери після інтерв'ю. Для кожного — обери, до якої категорії він належить. Після кожного вибору — 1-рядкове пояснення. У кінці — твій результат.
+    </div>
+
+    <div class="categories-explainer">
+      <div class="cat-row">
+        <div class="cat-badge strong">STRONG</div>
+        <div class="cat-desc">Конкретний факт або цитата з інтерв'ю, чіткий decision, actionable для рекрутера.</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-badge weak">WEAK</div>
+        <div class="cat-desc">Загальне, без фактів. «Подобається», «сильний», «частково» — recruiter не може з цим діяти.</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-badge bias">BIAS</div>
+        <div class="cat-desc">Суб'єктивний ярлик («не наш vibe», «занадто закрита», «зелена»). Ховає bias, ламає employer brand.</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="startBtn">ПОЧАТИ DRILL →</button>
+  </div>
+
+  <!-- DRILL -->
+  <div id="drillView" class="view hidden">
+    <div class="drill-bar">
+      <div class="drill-count">
+        <span id="drillCounter">1 / 10</span>
+        <span class="drill-count-progress"><span class="drill-count-fill" id="drillProgressFill" style="width: 10%;"></span></span>
+      </div>
+      <div class="drill-score" id="drillScore">0 / 0</div>
+    </div>
+
+    <div class="feedback-card">
+      <div class="feedback-card-label">ФІДБЕК ВІД ХМ</div>
+      <div class="feedback-text" id="feedbackText"></div>
+    </div>
+
+    <div id="choicesArea"></div>
+    <div id="explanationArea"></div>
+    <div id="nextArea"></div>
+
+    <div style="display: flex; justify-content: center; margin-top: 24px;">
+      <button class="btn btn-ghost" id="restartDrillBtn" style="padding: 8px 16px; font-size: 11px;">↺ Почати заново</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsView" class="view hidden">
+    <div class="results-hero">
+      <div class="results-hero-tag">FEEDBACK FLASHCARDS</div>
+      <div class="results-hero-title">Твоє око на фідбек</div>
+    </div>
+
+    <div class="score-card">
+      <div class="score-big" id="finalScore"></div>
+      <div>
+        <div class="score-label">ВІРНИХ ВІДПОВІДЕЙ</div>
+        <div class="score-text" id="finalText"></div>
+      </div>
+    </div>
+
+    <div class="section-h">ПО КАТЕГОРІЯХ</div>
+    <div class="breakdown" id="breakdownArea"></div>
+
+    <div class="section-h">ЩО ТРЕБА ПОТРЕНУВАТИ</div>
+    <div id="insightsList"></div>
+
+    <div class="takeaway-block">
+      <div class="takeaway-h">КЛЮЧОВА ДУМКА</div>
+      <div class="takeaway-text" id="takeawayText"></div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn btn-primary" id="restartResultsBtn">↺ ЩЕ РАЗ</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// ============================================================
+// FLASHCARDS — 10 items
+// ============================================================
+
+const FLASHCARDS = [
+  {
+    text: "Reject. Технічно сильна, але на сценарних питаннях по message queues не змогла описати handling exactly-once. Для нашої ролі це must-have. Профіль не змінюємо, акцент на production досвід.",
+    correct: "strong",
+    explanation: "<strong>Strong.</strong> Чіткий decision + конкретна слабкість з прикладом з інтерв'ю + сигнал для рекрутера, як коригувати pipeline. Recruiter може діяти сьогодні."
+  },
+  {
+    text: "Слабенько. Не дотягує до нашого рівня. Подивимось ще когось.",
+    correct: "weak",
+    explanation: "<strong>Weak.</strong> Жодного факту, оцінювальна категорія («не дотягує»), action розмитий («ще когось»). Recruiter не знає, кого саме шукати далі."
+  },
+  {
+    text: "Не наш vibe. Якась дивна, занадто закрита у комунікації.",
+    correct: "bias",
+    explanation: "<strong>Bias.</strong> Класичний приклад. «Не наш vibe» і «дивна» — ярлики, які можуть ховати affinity bias. Жодного факту з інтерв'ю. Не пиши так — особливо у PeopleForce."
+  },
+  {
+    text: "Hire. На final-call розповіла кейс закриття $1.2M ARR з LATAM-оператором: deal structure, її роль на кожному етапі. Готую offer сьогодні, salary $3200.",
+    correct: "strong",
+    explanation: "<strong>Strong.</strong> Швидкий decision + конкретний кейс з цифрою + action і salary band. Recruiter має все, щоб готувати offer без додаткових питань."
+  },
+  {
+    text: "Хороший досвід, professional approach. Подобається. Беремо.",
+    correct: "weak",
+    explanation: "<strong>Weak.</strong> «Подобається» — це не критерій, це враження. Decision є, але без обґрунтування. На onboarding пам'ять про «чому беремо» вивітриться, і команда не зрозуміє очікувань."
+  },
+  {
+    text: "Молода, ще зелена. Може повернемось через рік-два.",
+    correct: "bias",
+    explanation: "<strong>Bias.</strong> Вік — захищена категорія. «Зелена» = оцінка віку, не навичок. Якщо concern про досвід — пиши конкретно: «3 роки досвіду, нам треба 5 на цій ролі»."
+  },
+  {
+    text: "No-hire. На питання про роботу при зміні пріоритетів описала, що працює краще при узгодженому roadmap. У нашій команді часто swap mid-sprint. Це role fit concern, не про людину.",
+    correct: "strong",
+    explanation: "<strong>Strong.</strong> Зразок чесного role fit concern: конкретна поведінка з інтерв'ю + контекст команди + фраза «не про людину» закриває bias-ризик. Так і треба."
+  },
+  {
+    text: "Технічні знання частково покривають вимоги. Soft skills на високому рівні.",
+    correct: "weak",
+    explanation: "<strong>Weak.</strong> Звучить структуровано, але порожньо. «Частково покривають» — які саме? «На високому рівні» — за яким критерієм? Recruiter повернеться з тими ж питаннями ще раз."
+  },
+  {
+    text: "Не зайде в команду. Не наш формат, інтуїція підказує.",
+    correct: "bias",
+    explanation: "<strong>Bias.</strong> «Інтуїція підказує» — це не критерій. «Не наш формат» — ярлик без даних. Якщо є справжній concern — знайди конкретну поведінку з інтерв'ю, яка його ілюструє."
+  },
+  {
+    text: "Hold до 25.06 — чекаємо фінал по Іванові. Якщо він знімається — повертаємось до Анни з offer без додаткових кроків.",
+    correct: "strong",
+    explanation: "<strong>Strong.</strong> Це не «Maybe» — це conditional next action. Hold з умовою + дедлайном + наступним кроком. Recruiter знає, як планувати наступний тиждень."
+  },
+];
+
+const CATEGORY_DEFS = {
+  strong: { name: "STRONG", icon: "✓" },
+  weak:   { name: "WEAK",   icon: "~" },
+  bias:   { name: "BIAS",   icon: "✗" },
+};
+
+// ============================================================
+// STATE
+// ============================================================
+
+const STORAGE_KEY = "gamzix_m4_drill_v1";
+
+let state = {
+  view: "setup",
+  idx: 0,
+  answers: [], // {idx, chosen, correct, isCorrect}
+};
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    if (saved.view) state = { ...state, ...saved };
+  } catch (e) {}
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function resetDrill() {
+  state = { view: "setup", idx: 0, answers: [] };
+  saveState();
+  render();
+}
+
+function el(id) { return document.getElementById(id); }
+function escapeHtml(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ============================================================
+// RENDER
+// ============================================================
+
+function renderDrill() {
+  const card = FLASHCARDS[state.idx];
+  const answered = state.answers.find(a => a.idx === state.idx);
+  const correctCount = state.answers.filter(a => a.isCorrect).length;
+  const answeredCount = state.answers.length;
+
+  el("drillCounter").textContent = `${state.idx + 1} / ${FLASHCARDS.length}`;
+  el("drillProgressFill").style.width = `${((state.idx + (answered ? 1 : 0)) / FLASHCARDS.length) * 100}%`;
+  el("drillScore").textContent = `${correctCount} / ${answeredCount}`;
+
+  el("feedbackText").textContent = card.text;
+
+  // Render choice buttons
+  const cats = ["strong", "weak", "bias"];
+  el("choicesArea").innerHTML = `
+    <div class="choices">
+      ${cats.map(cat => {
+        let cls = "choice-btn " + cat;
+        if (answered) {
+          if (answered.chosen === cat) {
+            cls += " selected";
+          } else if (cat === card.correct && !answered.isCorrect) {
+            cls += " show-correct";
+          } else {
+            cls += " dim";
+          }
+        }
+        return `
+          <button class="${cls}" data-cat="${cat}" ${answered ? "disabled" : ""}>
+            <span class="choice-btn-icon">${CATEGORY_DEFS[cat].icon}</span>
+            <span class="choice-btn-label">${CATEGORY_DEFS[cat].name}</span>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  if (!answered) {
+    document.querySelectorAll(".choice-btn").forEach(btn => {
+      btn.addEventListener("click", () => handleChoice(btn.dataset.cat));
+    });
+    el("explanationArea").innerHTML = "";
+    el("nextArea").innerHTML = "";
+  } else {
+    const cls = answered.isCorrect ? "correct" : "wrong";
+    const head = answered.isCorrect ? "ВІРНО" : "НЕ ЗОВСІМ";
+    el("explanationArea").innerHTML = `
+      <div class="explanation ${cls}">
+        <div class="explanation-h">${head}</div>
+        <div class="explanation-body">${card.explanation}</div>
+      </div>
+    `;
+    const isLast = state.idx === FLASHCARDS.length - 1;
+    el("nextArea").innerHTML = `
+      <div class="next-row">
+        <button class="btn btn-primary" id="nextBtn">${isLast ? "ПОБАЧИТИ РЕЗУЛЬТАТ →" : "ДАЛІ →"}</button>
+      </div>
+    `;
+    el("nextBtn").addEventListener("click", advance);
+  }
+}
+
+function renderResults() {
+  const total = FLASHCARDS.length;
+  const correct = state.answers.filter(a => a.isCorrect).length;
+  const pct = Math.round((correct / total) * 100);
+
+  let summaryText = "";
+  if (pct >= 90) summaryText = "Чудово. Око на фідбек у тебе відточене — і Strong бачиш, і Bias ловиш до того, як він зашкодить.";
+  else if (pct >= 70) summaryText = "Хороший рівень. База є, але на 1-2 категоріях ще є місце для тренування — подивись нижче.";
+  else if (pct >= 50) summaryText = "Серединно. У реальних фідбеках ти, ймовірно, плутаєш категорії — особливо Bias може проходити повз непомітно.";
+  else summaryText = "Поки слабке око. Перепрочитай пояснення до кожного питання — це найшвидший спосіб налаштуватись.";
+
+  el("finalScore").innerHTML = `${correct}<span class="score-big-sub">/${total}</span>`;
+  el("finalText").textContent = summaryText;
+
+  // Breakdown per category
+  const cats = ["strong", "weak", "bias"];
+  el("breakdownArea").innerHTML = cats.map(cat => {
+    const itemsOfCat = FLASHCARDS.map((c, i) => ({ ...c, idx: i })).filter(c => c.correct === cat);
+    const correctInCat = state.answers.filter(a => {
+      return a.isCorrect && FLASHCARDS[a.idx].correct === cat;
+    }).length;
+    const totalInCat = itemsOfCat.length;
+    const catPct = totalInCat > 0 ? Math.round((correctInCat / totalInCat) * 100) : 0;
+    let barCls = "weak";
+    if (catPct >= 75) barCls = "strong";
+    else if (catPct >= 40) barCls = "ok";
+    return `
+      <div class="breakdown-cell">
+        <div class="breakdown-name">${CATEGORY_DEFS[cat].name}</div>
+        <div class="breakdown-score">${correctInCat}/${totalInCat}</div>
+        <div class="breakdown-bar"><div class="breakdown-bar-fill ${barCls}" style="width: ${catPct}%;"></div></div>
+      </div>
+    `;
+  }).join("");
+
+  // Insights — focus on weakest category
+  let insights = [];
+  cats.forEach(cat => {
+    const itemsOfCat = FLASHCARDS.map((c, i) => ({ ...c, idx: i })).filter(c => c.correct === cat);
+    const correctInCat = state.answers.filter(a => a.isCorrect && FLASHCARDS[a.idx].correct === cat).length;
+    const totalInCat = itemsOfCat.length;
+    const catPct = totalInCat > 0 ? correctInCat / totalInCat : 1;
+    if (catPct < 0.7) {
+      insights.push(insightFor(cat, catPct));
+    }
+  });
+  if (insights.length === 0) {
+    insights.push(`
+      <div class="insight-card">
+        <div class="insight-card-h">Ти добре розрізняєш усі 3 категорії</div>
+        <div class="insight-card-body">У тебе мало пропусків. Тепер головне — переносити цю чутливість у власні фідбеки. Перш ніж відправити recruiter — перевір кожний рядок: де факт, де враження, де ярлик.</div>
+      </div>
+    `);
+  }
+  el("insightsList").innerHTML = insights.join("");
+
+  el("takeawayText").textContent = pct >= 80
+    ? "Якщо твоє око бачить це у чужих фідбеках — починай бачити у власних до того, як натиснути «надіслати»."
+    : pct >= 50
+    ? "Конкретний факт або цитата біля кожної оцінки — це і є те, що відрізняє Strong від решти."
+    : "Перепиши свій останній фідбек — обведи кожне твердження. Що з них — факт? Що — враження? Що — ярлик?";
+}
+
+function insightFor(cat, pct) {
+  const map = {
+    strong: {
+      h: "Strong — варто потренувати",
+      body: "Ти інколи плутаєш сильні фідбеки зі слабкими. Strong = має 4 ознаки: чіткий decision, конкретний факт з інтерв'ю, посилання на критерії оцінки, actionable наступний крок. Якщо є всі 4 — це Strong, навіть якщо тон звучить буденно."
+    },
+    weak: {
+      h: "Weak — варто потренувати",
+      body: "Ти, ймовірно, читаєш «structured»-форму як сигнал якості — наприклад «технічні знання частково покривають, soft skills на високому рівні». Це звучить упорядковано, але порожньо. Weak розпізнаєш так: спробуй замінити рядок на протилежний — якщо звучить так само загально, це Weak."
+    },
+    bias: {
+      h: "Bias — варто потренувати",
+      body: "Це найважче і найважливіше. Bias часто прикидається «здоровою інтуїцією» — «не наш vibe», «не зайде», «зелена», «закрита». Тест: який факт з інтерв'ю стоїть за цим словом? Якщо нема — це bias. У PeopleForce такі фрази тримай за заборонені."
+    }
+  };
+  const m = map[cat];
+  return `
+    <div class="insight-card">
+      <div class="insight-card-h">${m.h}</div>
+      <div class="insight-card-body">${m.body}</div>
+    </div>
+  `;
+}
+
+function render() {
+  el("setupView").classList.toggle("hidden", state.view !== "setup");
+  el("drillView").classList.toggle("hidden", state.view !== "drill");
+  el("resultsView").classList.toggle("hidden", state.view !== "results");
+  if (state.view === "drill") renderDrill();
+  if (state.view === "results") renderResults();
+}
+
+// ============================================================
+// FLOW
+// ============================================================
+
+function startDrill() {
+  state.view = "drill";
+  state.idx = 0;
+  state.answers = [];
+  saveState();
+  render();
+}
+
+function handleChoice(chosen) {
+  const card = FLASHCARDS[state.idx];
+  const isCorrect = chosen === card.correct;
+  state.answers.push({
+    idx: state.idx,
+    chosen,
+    correct: card.correct,
+    isCorrect,
+  });
+  saveState();
+  render();
+}
+
+function advance() {
+  if (state.idx < FLASHCARDS.length - 1) {
+    state.idx += 1;
+    saveState();
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    state.view = "results";
+    saveState();
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadState();
+  render();
+  el("startBtn").addEventListener("click", startDrill);
+  el("restartDrillBtn").addEventListener("click", () => {
+    if (confirm("Почати drill заново? Прогрес буде втрачено.")) resetDrill();
+  });
+  el("restartResultsBtn").addEventListener("click", resetDrill);
+});
+</script>
+</body>
+</html>
