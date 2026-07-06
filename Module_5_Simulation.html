@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAMZIX · Module 05 · Test Task Audit</title>
+<style>
+:root {
+  color-scheme: light;
+  --yellow: #F5CE00;
+  --yellow-soft: #FFF6CC;
+  --yellow-bg: #FFFCED;
+  --black: #0B0B0B;
+  --white: #FFFFFF;
+  --grey-dark: #333333;
+  --grey: #595959;
+  --grey-light: #D9D9D9;
+  --grey-bg: #F5F5F5;
+  --red: #C00000;
+  --red-bg: #FFE5E5;
+  --green: #2D7A2D;
+  --green-bg: #E6F4E6;
+  --orange: #B86E00;
+  --orange-bg: #FFF1D9;
+  --font: "Century Gothic", "Avant Garde", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--white); color: var(--black);
+  font-family: var(--font); font-size: 15px; line-height: 1.55;
+}
+.app { max-width: 720px; margin: 0 auto; padding: 0 0 60px 0; }
+
+.hero { background: var(--black); color: var(--white); padding: 32px 32px 28px 32px; }
+.hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 16px; }
+.hero-mod { color: var(--yellow); font-size: 32px; font-weight: bold; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+.hero-title { color: var(--white); font-size: 26px; font-weight: bold; line-height: 1.15; margin-bottom: 12px; }
+.hero-sub { color: var(--white); opacity: 0.7; font-size: 13px; font-style: italic; }
+.strip { height: 8px; background: var(--yellow); }
+
+.view { padding: 28px 32px 0 32px; }
+.view.hidden { display: none; }
+
+/* SETUP */
+.setup-intro {
+  background: var(--yellow-soft); border-left: 6px solid var(--yellow);
+  padding: 18px 22px; font-size: 14px; line-height: 1.6; margin-bottom: 24px;
+}
+.setup-intro-h { font-size: 10px; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; color: var(--black); }
+
+.categories-explainer {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 28px;
+}
+.cat-row {
+  display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--grey-light);
+}
+.cat-row:last-child { border-bottom: none; }
+.cat-badge {
+  text-align: center; padding: 8px 0;
+  font-size: 12px; letter-spacing: 2px; font-weight: bold;
+}
+.cat-badge.good    { background: var(--green);  color: var(--white); }
+.cat-badge.redflag { background: var(--red);    color: var(--white); }
+.cat-badge.skip    { background: var(--grey-dark); color: var(--white); }
+.cat-desc { font-size: 13px; line-height: 1.5; color: var(--grey-dark); }
+
+/* BUTTONS */
+.btn {
+  font-family: var(--font); font-weight: bold; letter-spacing: 1.5px;
+  cursor: pointer; border: none; padding: 14px 28px; font-size: 13px; transition: all 0.15s;
+}
+.btn-primary { background: var(--black); color: var(--yellow); }
+.btn-primary:hover:not(:disabled) { background: #222; }
+.btn-secondary { background: var(--white); color: var(--black); border: 2px solid var(--black); }
+.btn-secondary:hover:not(:disabled) { background: var(--black); color: var(--yellow); }
+.btn-ghost { background: transparent; color: var(--grey); border: 1px solid var(--grey-light); }
+.btn-ghost:hover:not(:disabled) { color: var(--black); border-color: var(--black); }
+.btn-block { display: block; width: 100%; }
+
+/* DRILL */
+.drill-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 18px;
+}
+.drill-count { font-size: 14px; font-weight: bold; color: var(--black); letter-spacing: 1px; }
+.drill-count-progress {
+  display: inline-block; width: 200px; height: 6px;
+  background: var(--grey-light); position: relative; margin-left: 10px; vertical-align: middle;
+}
+.drill-count-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  background: var(--yellow); transition: width 0.3s;
+}
+.drill-score { font-size: 12px; color: var(--grey); letter-spacing: 1px; }
+
+/* CARD TYPE TAG */
+.card-type-tag {
+  display: inline-block;
+  font-size: 10px; letter-spacing: 2px; font-weight: bold;
+  padding: 3px 10px; margin-bottom: 12px;
+  background: var(--grey-bg); color: var(--grey);
+}
+
+.feedback-card {
+  background: var(--white); border: 2px solid var(--black);
+  padding: 24px 28px; margin-bottom: 24px;
+  position: relative; min-height: 120px;
+}
+.feedback-card-label {
+  position: absolute; top: -12px; left: 20px;
+  background: var(--yellow); padding: 3px 10px;
+  font-size: 10px; letter-spacing: 2px; font-weight: bold; color: var(--black);
+}
+.feedback-text {
+  font-size: 16px; line-height: 1.55; color: var(--black);
+}
+.context-block {
+  font-size: 13px; color: var(--grey); border-top: 1px solid var(--grey-light);
+  margin-top: 14px; padding-top: 12px; line-height: 1.5;
+}
+.context-block strong { color: var(--black); }
+
+/* CHOICE BUTTONS */
+.choices {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  margin-bottom: 18px;
+}
+.choice-btn {
+  background: var(--white); border: 2px solid var(--grey-light);
+  padding: 18px 10px; cursor: pointer; text-align: center;
+  transition: all 0.15s; font-family: var(--font);
+}
+.choice-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.choice-btn:disabled { cursor: default; }
+.choice-btn-icon { font-size: 22px; line-height: 1; margin-bottom: 6px; display: block; }
+.choice-btn-label { font-size: 11px; letter-spacing: 2px; font-weight: bold; color: var(--black); }
+
+.choice-btn.good    { border-color: var(--green); }
+.choice-btn.good:hover:not(:disabled)    { background: var(--green-bg); }
+.choice-btn.redflag { border-color: var(--red); }
+.choice-btn.redflag:hover:not(:disabled) { background: var(--red-bg); }
+.choice-btn.skip    { border-color: var(--grey-dark); }
+.choice-btn.skip:hover:not(:disabled)    { background: var(--grey-bg); }
+
+.choice-btn.dim { opacity: 0.35; }
+.choice-btn.selected.good    { background: var(--green);     border-color: var(--green); }
+.choice-btn.selected.good    .choice-btn-label,
+.choice-btn.selected.good    .choice-btn-icon { color: var(--white); }
+.choice-btn.selected.redflag { background: var(--red);       border-color: var(--red); }
+.choice-btn.selected.redflag .choice-btn-label,
+.choice-btn.selected.redflag .choice-btn-icon { color: var(--white); }
+.choice-btn.selected.skip    { background: var(--grey-dark); border-color: var(--grey-dark); }
+.choice-btn.selected.skip    .choice-btn-label,
+.choice-btn.selected.skip    .choice-btn-icon { color: var(--white); }
+
+.choice-btn.show-correct { border-width: 3px; position: relative; }
+.choice-btn.show-correct::after {
+  content: "←"; position: absolute; right: 8px; top: 8px;
+  color: var(--green); font-weight: bold;
+}
+
+/* EXPLANATION */
+.explanation {
+  padding: 16px 18px; margin-bottom: 18px;
+  border-left: 6px solid var(--grey);
+  font-size: 13px; line-height: 1.6;
+}
+.explanation.correct { background: var(--green-bg); border-color: var(--green); }
+.explanation.wrong   { background: var(--red-bg);   border-color: var(--red); }
+.explanation-h {
+  font-size: 11px; letter-spacing: 2px; font-weight: bold; margin-bottom: 6px;
+}
+.explanation.correct .explanation-h { color: var(--green); }
+.explanation.wrong   .explanation-h { color: var(--red); }
+.explanation-body { color: var(--grey-dark); }
+.explanation-body strong { color: var(--black); }
+
+.next-row { display: flex; justify-content: flex-end; }
+
+/* RESULTS */
+.results-hero { background: var(--black); color: var(--white); padding: 24px 28px; margin-bottom: 24px; }
+.results-hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 10px; }
+.results-hero-title { font-size: 22px; font-weight: bold; }
+
+.score-card { background: var(--yellow); padding: 20px 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; }
+.score-big { font-size: 56px; font-weight: bold; line-height: 1; color: var(--black); }
+.score-big-sub { font-size: 22px; }
+.score-label { font-size: 11px; letter-spacing: 2px; color: var(--black); font-weight: bold; margin-bottom: 4px; }
+.score-text { font-size: 14px; color: var(--black); }
+
+.breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 24px; }
+.breakdown-cell {
+  background: var(--white); border: 1px solid var(--grey-light);
+  padding: 14px 12px; text-align: center;
+}
+.breakdown-name { font-size: 10px; letter-spacing: 2px; font-weight: bold; color: var(--grey); margin-bottom: 6px; }
+.breakdown-score { font-size: 24px; font-weight: bold; color: var(--black); line-height: 1; margin-bottom: 4px; }
+.breakdown-bar { height: 4px; background: var(--grey-light); margin-top: 8px; position: relative; }
+.breakdown-bar-fill { height: 100%; transition: width 0.4s; }
+.breakdown-bar-fill.strong { background: var(--green); }
+.breakdown-bar-fill.ok     { background: var(--orange); }
+.breakdown-bar-fill.weak   { background: var(--red); }
+
+.section-h {
+  font-size: 13px; letter-spacing: 2px; font-weight: bold; color: var(--black);
+  margin-bottom: 14px; padding-bottom: 6px; border-bottom: 3px solid var(--yellow);
+}
+.insight-card {
+  background: var(--white); border: 1px solid var(--grey-light);
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.insight-card-h { font-size: 13px; font-weight: bold; color: var(--black); margin-bottom: 6px; }
+.insight-card-body { font-size: 13px; line-height: 1.55; color: var(--grey-dark); }
+
+.takeaway-block { background: var(--black); color: var(--white); padding: 20px 24px; margin-top: 24px; }
+.takeaway-h { color: var(--yellow); font-size: 10px; letter-spacing: 2.5px; font-weight: bold; margin-bottom: 10px; }
+.takeaway-text { font-size: 16px; font-weight: bold; line-height: 1.4; }
+
+.results-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+@media (max-width: 560px) {
+  .hero { padding: 24px 20px; }
+  .hero-mod { font-size: 28px; }
+  .hero-title { font-size: 22px; }
+  .view { padding: 20px 20px 0 20px; }
+  .feedback-text { font-size: 14px; }
+  .choices { gap: 6px; }
+  .choice-btn { padding: 14px 6px; }
+  .choice-btn-label { font-size: 10px; letter-spacing: 1px; }
+  .score-card { flex-direction: column; align-items: start; gap: 12px; }
+  .score-big { font-size: 42px; }
+  .cat-row { grid-template-columns: 100px 1fr; gap: 10px; }
+  .drill-count-progress { width: 120px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div class="hero-tag">GAMZIX HIRING EXCELLENCE · DRILL</div>
+    <div class="hero-mod">MODULE 05</div>
+    <div class="hero-title">Test Task Audit</div>
+    <div class="hero-sub">10 кейсів · оціни кожен · ~4 хвилини</div>
+  </div>
+  <div class="strip"></div>
+
+  <!-- SETUP -->
+  <div class="view" id="setupView">
+    <div class="setup-intro">
+      <div class="setup-intro-h">ЯК ЦЕ ПРАЦЮЄ</div>
+      Покажу 10 сценаріїв: фрагменти брифів або ситуації з кандидатами. Для кожного — визнач категорію. Після вибору — 1-рядкове пояснення. У кінці — твій результат по всіх трьох категоріях.
+    </div>
+
+    <div class="categories-explainer">
+      <div class="cat-row">
+        <div class="cat-badge good">ДОБРЕ</div>
+        <div class="cat-desc">Бриф якісний або рішення дати test task обґрунтоване — чіткий scope, реалістичний час, критерії, фідбек гарантований.</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-badge redflag">РЕД ФЛЕГ</div>
+        <div class="cat-desc">Є хоча б один критичний сигнал: занадто довго, free production work, розмитий scope, немає фідбеку, undefined deadline.</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-badge skip">НЕ ПОТРІБЕН</div>
+        <div class="cat-desc">Test task у цьому контексті зайвий: інтерв'ю вже дало сигнал, є portfolio, або причина — «бо так заведено».</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="startBtn">ПОЧАТИ DRILL →</button>
+  </div>
+
+  <!-- DRILL -->
+  <div class="view hidden" id="drillView">
+    <div class="drill-bar">
+      <div>
+        <span class="drill-count" id="drillCounter">1 / 10</span>
+        <span class="drill-count-progress"><span class="drill-count-fill" id="drillProgressFill" style="width:0%"></span></span>
+      </div>
+      <div>
+        <span class="drill-score" id="drillScore">0 / 0</span>
+        <button class="btn btn-ghost" id="restartDrillBtn" style="margin-left:10px;padding:6px 12px;font-size:11px;">↺</button>
+      </div>
+    </div>
+
+    <div class="feedback-card">
+      <div class="feedback-card-label" id="cardTypeTag">БРИФ</div>
+      <div class="feedback-text" id="feedbackText"></div>
+      <div class="context-block hidden" id="contextBlock"></div>
+    </div>
+
+    <div id="choicesArea"></div>
+    <div id="explanationArea"></div>
+    <div id="nextArea"></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="view hidden" id="resultsView">
+    <div class="results-hero">
+      <div class="results-hero-tag">FEEDBACK AUDIT DRILL</div>
+      <div class="results-hero-title">Твоє око на test tasks</div>
+    </div>
+
+    <div class="score-card">
+      <div class="score-big" id="finalScore">—</div>
+      <div>
+        <div class="score-label">ВІРНИХ ВІДПОВІДЕЙ</div>
+        <div class="score-text" id="finalText"></div>
+      </div>
+    </div>
+
+    <div class="section-h">ПО КАТЕГОРІЯХ</div>
+    <div class="breakdown" id="breakdownArea"></div>
+
+    <div class="section-h">ЩО ТРЕБА ПОТРЕНУВАТИ</div>
+    <div id="insightsList"></div>
+
+    <div class="takeaway-block">
+      <div class="takeaway-h">КЛЮЧОВА ДУМКА</div>
+      <div class="takeaway-text" id="takeawayText"></div>
+    </div>
+
+    <div class="results-actions">
+      <button class="btn btn-primary" id="restartResultsBtn">↺ ЩЕ РАЗ</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// FLASHCARDS — 10 items
+// ============================================================
+
+const FLASHCARDS = [
+  {
+    tag: "БРИФ",
+    text: "Розробіть повнофункціональний модуль нотифікацій: push, email, in-app. Scope — на ваш розсуд, орієнтуйтесь на production-ready рішення. Дедлайн: коли будете готові.",
+    context: null,
+    correct: "redflag",
+    explanation: "<strong>Ред флег.</strong> Одразу три проблеми: неозначений scope («на ваш розсуд»), orієнтир на production-ready = безоплатна робота, відсутній дедлайн. Сильний кандидат закриє листа і піде далі."
+  },
+  {
+    tag: "СИТУАЦІЯ",
+    text: "Senior Data Scientist, 6 років досвіду. Два сильних інтерв'ю — обидва з оцінкою Hire. Портфоліо закрите NDA. Роль вимагає специфічного досвіду з прогнозування відтоку — на інтерв'ю перевірити hands-on не вдалося.",
+    context: null,
+    correct: "good",
+    explanation: "<strong>Добре.</strong> Класичний кейс, де test task виправданий: портфоліо недоступне, специфічна практична навичка — ядро ролі, і інтерв'ю не дало достатнього сигналу. Всі три умови виконані."
+  },
+  {
+    tag: "БРИФ",
+    text: "Завдання: напишіть SQL-запити для аналізу нашої бази користувачів. Надаємо доступ до staging із реальною структурою та 50,000 рядків production-даних. Дедлайн: 7 днів.",
+    context: null,
+    correct: "redflag",
+    explanation: "<strong>Ред флег.</strong> Реальні дані від компанії в завданні — це free production work і privacy red flag. Кандидат фактично робить безоплатний аналіз. Завжди використовуйте mock data або синтетичні датасети."
+  },
+  {
+    tag: "СИТУАЦІЯ",
+    text: "Middle Frontend Developer. Сильне технічне інтерв'ю: розкрив 3 реальних кейси з деталями, показав GitHub із релевантними проектами на React. Рекрутер хоче додати стандартний test task «для порядку».",
+    context: null,
+    correct: "skip",
+    explanation: "<strong>Не потрібен.</strong> «Для порядку» — це не аргумент. Є GitHub, є детальні кейси з інтерв'ю, сигнал по практичних скілах отриманий. Test task тут — це прибрати ціну без додаткового сигналу."
+  },
+  {
+    tag: "БРИФ",
+    text: "Завдання займе 2–3 години. Реалізуйте компонент фільтрації списку транзакцій (mock data додаємо). Оцінюємо: структуру компонентів, обробку стану, читабельність. Дедлайн — 5 днів. Фідбек надамо протягом 48 годин незалежно від результату. Питання до старту — welcome.",
+    context: null,
+    correct: "good",
+    explanation: "<strong>Добре.</strong> Ідеальний бриф: реалістичний час, mock data, чіткі критерії, твердий фідбек-commitment, можливість поставити питання. Кандидат знає чого чекати на кожному кроці."
+  },
+  {
+    tag: "СИТУАЦІЯ",
+    text: "Junior Backend без досвіду роботи. Інтерв'ю показало хороші теоретичні знання, але жодних практичних кейсів — первша робота. Portfolio відсутнє. Роль вимагає самостійної роботи з першого тижня.",
+    context: null,
+    correct: "good",
+    explanation: "<strong>Добре.</strong> Саме той випадок: portfolio немає об'єктивно (junior, перша робота), практичні скіли — uncertainty після інтерв'ю, роль вимагає hands-on з дня 1. Test task дасть потрібний сигнал."
+  },
+  {
+    tag: "БРИФ",
+    text: "Хочемо побачити, як ти думаєш. Зроби щось цікаве з нашим публічним API — обмежень немає, час необмежений. Очікуємо чогось, що нас здивує.",
+    context: null,
+    correct: "redflag",
+    explanation: "<strong>Ред флег.</strong> Undefined scope у чистому вигляді. Кандидат не знає, як себе калібрувати: скільки часу витратити, що вважається «цікавим», якими критеріями керуватись. Ти отримаєш все що завгодно — і не зможеш це порівняти."
+  },
+  {
+    tag: "СИТУАЦІЯ",
+    text: "Senior Product Manager, 8 років досвіду. Два раунди інтерв'ю — strong Hire від обох інтерв'юерів. Рішення вже прийнято. Рекрутер запитує: «Може, дамо test task, щоб ще раз переконатись?»",
+    context: null,
+    correct: "skip",
+    explanation: "<strong>Не потрібен.</strong> Рішення вже є — Hire від двох інтерв'юерів. «Ще раз переконатись» після strong Hire — це не аргумент, це затримка process'у і сигнал кандидату, що ти невпевнений. Він може піти."
+  },
+  {
+    tag: "БРИФ",
+    text: "Завдання: спроектуйте high-level архітектуру сервісу нотифікацій для 10M users. Час: 3–4 години. Оцінюємо підхід до trade-offs, scalability thinking, обґрунтування технічних рішень. Дедлайн: 5 робочих днів. Фідбек — протягом 3 робочих днів, незалежно від рішення.",
+    context: null,
+    correct: "good",
+    explanation: "<strong>Добре.</strong> Реалістичний час для Senior-рівня, фокус на принципи (не production-code), чіткі критерії, твердий фідбек-commitment. Немає exploitation — архітектурна схема не може бути використана як готовий продукт."
+  },
+  {
+    tag: "СИТУАЦІЯ",
+    text: "QA Engineer, Middle рівень. Після технічного інтерв'ю результат borderline: тест-дизайн і автоматизація — на рівні, але є сумнів по досвіду з performance testing, що є ключовим для ролі. Portfolio немає.",
+    context: null,
+    correct: "good",
+    explanation: "<strong>Добре.</strong> Класичний «borderline + specific uncertainty» кейс. Test task по performance testing дасть tipping signal саме по тому критерію, де є сумнів — і portfolio недоступне. Ціна виправдана."
+  }
+];
+
+const CATEGORY_DEFS = {
+  good:    { name: "ДОБРЕ",      icon: "✓" },
+  redflag: { name: "РЕД ФЛЕГ",  icon: "⚠" },
+  skip:    { name: "НЕ ПОТРІБЕН", icon: "✗" },
+};
+
+// ============================================================
+// STATE
+// ============================================================
+
+const STORAGE_KEY = "gamzix_m5_drill_v1";
+
+let state = { view: "setup", idx: 0, answers: [] };
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    if (saved.view) state = { ...state, ...saved };
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function resetDrill() {
+  state = { view: "setup", idx: 0, answers: [] };
+  saveState(); render();
+}
+
+function el(id) { return document.getElementById(id); }
+
+// ============================================================
+// RENDER
+// ============================================================
+
+function renderDrill() {
+  const card = FLASHCARDS[state.idx];
+  const answered = state.answers.find(a => a.idx === state.idx);
+  const correctCount = state.answers.filter(a => a.isCorrect).length;
+  const answeredCount = state.answers.length;
+
+  el("drillCounter").textContent = `${state.idx + 1} / ${FLASHCARDS.length}`;
+  el("drillProgressFill").style.width = `${((state.idx + (answered ? 1 : 0)) / FLASHCARDS.length) * 100}%`;
+  el("drillScore").textContent = `${correctCount} / ${answeredCount}`;
+
+  el("cardTypeTag").textContent = card.tag;
+  el("feedbackText").textContent = card.text;
+
+  const ctxBlock = el("contextBlock");
+  if (card.context) {
+    ctxBlock.innerHTML = card.context;
+    ctxBlock.classList.remove("hidden");
+  } else {
+    ctxBlock.classList.add("hidden");
+  }
+
+  const cats = ["good", "redflag", "skip"];
+  el("choicesArea").innerHTML = `
+    <div class="choices">
+      ${cats.map(cat => {
+        let cls = "choice-btn " + cat;
+        if (answered) {
+          if (answered.chosen === cat) cls += " selected";
+          else if (cat === card.correct && !answered.isCorrect) cls += " show-correct";
+          else cls += " dim";
+        }
+        return `
+          <button class="${cls}" data-cat="${cat}" ${answered ? "disabled" : ""}>
+            <span class="choice-btn-icon">${CATEGORY_DEFS[cat].icon}</span>
+            <span class="choice-btn-label">${CATEGORY_DEFS[cat].name}</span>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  if (!answered) {
+    document.querySelectorAll(".choice-btn").forEach(btn => {
+      btn.addEventListener("click", () => handleChoice(btn.dataset.cat));
+    });
+    el("explanationArea").innerHTML = "";
+    el("nextArea").innerHTML = "";
+  } else {
+    const cls = answered.isCorrect ? "correct" : "wrong";
+    const head = answered.isCorrect ? "ВІРНО" : "НЕ ЗОВСІМ";
+    el("explanationArea").innerHTML = `
+      <div class="explanation ${cls}">
+        <div class="explanation-h">${head}</div>
+        <div class="explanation-body">${card.explanation}</div>
+      </div>
+    `;
+    const isLast = state.idx === FLASHCARDS.length - 1;
+    el("nextArea").innerHTML = `
+      <div class="next-row">
+        <button class="btn btn-primary" id="nextBtn">${isLast ? "ПОБАЧИТИ РЕЗУЛЬТАТ →" : "ДАЛІ →"}</button>
+      </div>
+    `;
+    el("nextBtn").addEventListener("click", advance);
+  }
+}
+
+function renderResults() {
+  const total = FLASHCARDS.length;
+  const correct = state.answers.filter(a => a.isCorrect).length;
+  const pct = Math.round((correct / total) * 100);
+
+  let summaryText = "";
+  if (pct >= 90) summaryText = "Відмінно. Ти бачиш red flags до того, як вони зіпсують pipeline, і розумієш, коли test task реально потрібен.";
+  else if (pct >= 70) summaryText = "Хороший рівень. Є 1–2 категорії, де варто підсилити розпізнавання — подивись нижче.";
+  else if (pct >= 50) summaryText = "Середньо. Деякі red flags проходять непоміченими — це ризик для employer brand і pipeline.";
+  else summaryText = "Є над чим попрацювати. Перечитай пояснення — вони конкретніші за теорію в модулі.";
+
+  el("finalScore").innerHTML = `${correct}<span class="score-big-sub">/${total}</span>`;
+  el("finalText").textContent = summaryText;
+
+  const cats = ["good", "redflag", "skip"];
+  const catLabels = { good: "ДОБРЕ", redflag: "РЕД ФЛЕГ", skip: "НЕ ПОТРІБЕН" };
+  el("breakdownArea").innerHTML = cats.map(cat => {
+    const items = FLASHCARDS.map((c, i) => ({...c, idx: i})).filter(c => c.correct === cat);
+    const correctInCat = state.answers.filter(a => a.isCorrect && FLASHCARDS[a.idx].correct === cat).length;
+    const totalInCat = items.length;
+    const catPct = totalInCat > 0 ? Math.round((correctInCat / totalInCat) * 100) : 0;
+    const barCls = catPct >= 75 ? "strong" : catPct >= 40 ? "ok" : "weak";
+    return `
+      <div class="breakdown-cell">
+        <div class="breakdown-name">${catLabels[cat]}</div>
+        <div class="breakdown-score">${correctInCat}/${totalInCat}</div>
+        <div class="breakdown-bar"><div class="breakdown-bar-fill ${barCls}" style="width:${catPct}%"></div></div>
+      </div>
+    `;
+  }).join("");
+
+  const insights = [];
+  cats.forEach(cat => {
+    const items = FLASHCARDS.filter(c => c.correct === cat);
+    const correctInCat = state.answers.filter(a => a.isCorrect && FLASHCARDS[a.idx].correct === cat).length;
+    const catPct = items.length > 0 ? correctInCat / items.length : 1;
+    if (catPct < 0.7) insights.push(insightFor(cat));
+  });
+  if (insights.length === 0) {
+    insights.push(`
+      <div class="insight-card">
+        <div class="insight-card-h">Ти добре розрізняєш усі три категорії</div>
+        <div class="insight-card-body">Тепер головне — переносити це в реальні рішення. Наступного разу, коли рекрутер пропонує test task, — запитай себе: який конкретний сигнал ми ще не отримали? Якщо відповіді немає — test task не потрібен.</div>
+      </div>
+    `);
+  }
+  el("insightsList").innerHTML = insights.join("");
+
+  el("takeawayText").textContent = pct >= 80
+    ? "Хороший бриф — це повага до часу кандидата. Кандидат читає бриф і вирішує, чи поважає його ця компанія."
+    : pct >= 50
+    ? "Red flag у брифі = втрата сильного кандидата ще до submission. Він не напише тобі про причину — просто не відповість."
+    : "Перш ніж відправити test task — заміряй час виконання сам. Не «за оцінкою», а реально. Це змінює все.";
+}
+
+function insightFor(cat) {
+  const map = {
+    good: {
+      h: "«Добре» — варто потренувати",
+      body: "Ти інколи не впізнаєш якісний бриф. Ознаки: час 2–5 годин, mock data (не реальні), чіткі критерії, гарантований фідбек з датою, можливість поставити питання до старту. Якщо всі п'ять є — це добре, навіть якщо бриф звучить буденно."
+    },
+    redflag: {
+      h: "«Ред флег» — варто потренувати",
+      body: "Деякі red flags не кричать — вони ховаються за нейтральним тоном. «На ваш розсуд», «production-ready», «коли будете готові» — це ред флеги навіть без агресивного тону. Тест: чи може кандидат зрозуміти scope і час за 30 секунд? Якщо ні — бриф не готовий."
+    },
+    skip: {
+      h: "«Не потрібен» — варто потренувати",
+      body: "Ти інколи даєш test task там, де сигнал вже отриманий. Перевіряй: є portfolio або GitHub? Інтерв'ю дало конкретні практичні кейси? Рішення вже Hire? Якщо хоча б одне «так» — запитай себе, який новий сигнал дасть test task. Якщо відповіді немає — не давай."
+    }
+  };
+  const m = map[cat];
+  return `
+    <div class="insight-card">
+      <div class="insight-card-h">${m.h}</div>
+      <div class="insight-card-body">${m.body}</div>
+    </div>
+  `;
+}
+
+function render() {
+  el("setupView").classList.toggle("hidden", state.view !== "setup");
+  el("drillView").classList.toggle("hidden",   state.view !== "drill");
+  el("resultsView").classList.toggle("hidden", state.view !== "results");
+  if (state.view === "drill")   renderDrill();
+  if (state.view === "results") renderResults();
+}
+
+// ============================================================
+// FLOW
+// ============================================================
+
+function startDrill() {
+  state = { view: "drill", idx: 0, answers: [] };
+  saveState(); render();
+}
+
+function handleChoice(chosen) {
+  const card = FLASHCARDS[state.idx];
+  state.answers.push({ idx: state.idx, chosen, correct: card.correct, isCorrect: chosen === card.correct });
+  saveState(); render();
+}
+
+function advance() {
+  if (state.idx < FLASHCARDS.length - 1) {
+    state.idx += 1;
+    saveState(); render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    state.view = "results";
+    saveState(); render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadState(); render();
+  el("startBtn").addEventListener("click", startDrill);
+  el("restartDrillBtn").addEventListener("click", () => {
+    if (confirm("Почати drill заново? Прогрес буде втрачено.")) resetDrill();
+  });
+  el("restartResultsBtn").addEventListener("click", resetDrill);
+});
+</script>
+</body>
+</html>
