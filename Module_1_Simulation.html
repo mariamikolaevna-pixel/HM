@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>GAMZIX · Module 01 · Simulation</title>
+<style>
+:root {
+  color-scheme: light;
+  --yellow: #F5CE00;
+  --yellow-soft: #FFF6CC;
+  --yellow-bg: #FFFCED;
+  --black: #0B0B0B;
+  --white: #FFFFFF;
+  --grey-dark: #333333;
+  --grey: #595959;
+  --grey-light: #D9D9D9;
+  --grey-bg: #F5F5F5;
+  --red: #C00000;
+  --green: #2D7A2D;
+  --orange: #B86E00;
+  --font: "Century Gothic", "Avant Garde", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--white); color: var(--black);
+  font-family: var(--font); font-size: 15px; line-height: 1.55;
+}
+.app { max-width: 760px; margin: 0 auto; padding: 0 0 80px 0; }
+
+/* HERO */
+.hero { background: var(--black); color: var(--white); padding: 36px 32px 32px 32px; }
+.hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 18px; }
+.hero-mod { color: var(--yellow); font-size: 36px; font-weight: bold; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+.hero-title { color: var(--white); font-size: 28px; font-weight: bold; line-height: 1.15; margin-bottom: 14px; }
+.hero-sub { color: var(--white); opacity: 0.7; font-size: 13px; font-style: italic; }
+.strip { height: 8px; background: var(--yellow); }
+
+/* VIEWS */
+.view { padding: 28px 32px 0 32px; }
+.view.hidden { display: none; }
+
+/* SCENARIO PICKER */
+.picker-h {
+  font-size: 11px; letter-spacing: 2.5px; font-weight: bold;
+  color: var(--grey); margin-bottom: 14px;
+}
+.scenarios { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.scenario-card {
+  background: var(--white); border: 2px solid var(--grey-light);
+  padding: 18px 20px; cursor: pointer; transition: all 0.15s;
+  position: relative;
+}
+.scenario-card:hover { border-color: var(--black); }
+.scenario-card.active { border-color: var(--yellow); background: var(--yellow-soft); }
+.scenario-card.active::before {
+  content: "●"; color: var(--yellow); position: absolute; top: 14px; right: 18px; font-size: 18px;
+}
+.scenario-dept { font-size: 10px; letter-spacing: 2px; color: var(--grey); font-weight: bold; margin-bottom: 6px; }
+.scenario-title { font-size: 18px; font-weight: bold; color: var(--black); margin-bottom: 4px; }
+.scenario-sub { font-size: 13px; color: var(--grey-dark); line-height: 1.5; }
+
+/* SETUP META */
+.setup-meta { border: 1px solid var(--grey-light); margin-bottom: 24px; overflow: hidden; }
+.setup-row { display: grid; grid-template-columns: 150px 1fr; border-bottom: 1px solid var(--grey-light); }
+.setup-row:last-child { border-bottom: none; }
+.setup-row-label {
+  background: var(--black); color: var(--yellow); padding: 12px 14px;
+  font-size: 10px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;
+  display: flex; align-items: center;
+}
+.setup-row-value { background: var(--white); padding: 12px 16px; font-size: 14px; line-height: 1.5; }
+.setup-row:nth-child(even) .setup-row-value { background: var(--grey-bg); }
+.setup-intro {
+  background: var(--yellow-soft); border-left: 6px solid var(--yellow);
+  padding: 16px 20px; font-size: 13px; line-height: 1.6; margin-bottom: 28px;
+}
+.setup-intro-h { font-size: 10px; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; color: var(--black); }
+
+/* BUTTONS */
+.btn {
+  font-family: var(--font); font-weight: bold; letter-spacing: 1.5px;
+  cursor: pointer; border: none; padding: 14px 28px; font-size: 13px; transition: all 0.15s;
+}
+.btn-primary { background: var(--black); color: var(--yellow); }
+.btn-primary:hover:not(:disabled) { background: #222; }
+.btn-secondary { background: var(--white); color: var(--black); border: 2px solid var(--black); }
+.btn-secondary:hover:not(:disabled) { background: var(--black); color: var(--yellow); }
+.btn-ghost { background: transparent; color: var(--grey); border: 1px solid var(--grey-light); }
+.btn-ghost:hover:not(:disabled) { color: var(--black); border-color: var(--black); }
+.btn-block { display: block; width: 100%; }
+
+/* CHAT */
+.chat-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; background: var(--grey-bg); border: 1px solid var(--grey-light);
+  margin-bottom: 16px; font-size: 12px;
+}
+.chat-bar-meta { color: var(--grey); letter-spacing: 0.5px; }
+.chat-bar-meta b { color: var(--black); text-transform: uppercase; letter-spacing: 1.5px; font-size: 10px; }
+.chat-bar-progress { font-size: 11px; color: var(--grey); letter-spacing: 1px; }
+
+.chat-log {
+  padding: 4px 0; margin-bottom: 18px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.msg { display: flex; flex-direction: column; max-width: 88%; }
+.msg-from {
+  font-size: 10px; letter-spacing: 2px; font-weight: bold;
+  text-transform: uppercase; margin-bottom: 5px; color: var(--grey);
+}
+.msg-body { padding: 12px 16px; font-size: 14px; line-height: 1.55; white-space: pre-wrap; word-wrap: break-word; }
+.msg.olena { align-self: flex-start; }
+.msg.olena .msg-from { color: var(--black); }
+.msg.olena .msg-body {
+  background: var(--white); border: 1px solid var(--grey-light);
+  border-left: 4px solid var(--black); color: var(--black);
+}
+.msg.hm { align-self: flex-end; }
+.msg.hm .msg-from { color: var(--black); text-align: right; }
+.msg.hm .msg-body { background: var(--yellow); color: var(--black); border: 1px solid var(--black); }
+
+/* CHOICES */
+.choices-block {
+  margin: 20px 0 28px 0;
+  padding: 18px 18px 4px 18px;
+  background: var(--yellow-bg);
+  border: 2px solid var(--yellow);
+}
+.choices-prompt {
+  font-size: 11px; letter-spacing: 2px; color: var(--black); font-weight: bold;
+  margin-bottom: 14px;
+}
+.choice {
+  background: var(--white);
+  border: 1px solid var(--grey-light);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 14px; line-height: 1.5;
+  transition: all 0.12s;
+  display: flex; gap: 12px;
+  align-items: flex-start;
+}
+.choice:hover { border-color: var(--black); background: var(--white); transform: translateX(2px); }
+.choice-letter {
+  background: var(--black); color: var(--yellow);
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: bold; flex-shrink: 0;
+  margin-top: 1px;
+}
+.choice-text { flex: 1; color: var(--grey-dark); }
+
+/* EVAL */
+.eval-hero { background: var(--black); color: var(--white); padding: 24px 28px; margin-bottom: 24px; }
+.eval-hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 10px; }
+.eval-hero-title { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
+.eval-hero-sub { font-size: 13px; opacity: 0.8; }
+
+.eval-score-card {
+  background: var(--yellow); padding: 20px 24px; margin-bottom: 24px;
+  display: flex; gap: 24px; align-items: center;
+}
+.eval-score-big { font-size: 48px; font-weight: bold; line-height: 1; color: var(--black); }
+.eval-score-label { font-size: 11px; letter-spacing: 2px; color: var(--black); font-weight: bold; margin-bottom: 4px; }
+.eval-score-text { font-size: 14px; color: var(--black); }
+
+.eval-section { margin-bottom: 28px; }
+.eval-section-h {
+  font-size: 13px; letter-spacing: 2px; font-weight: bold;
+  color: var(--black); margin-bottom: 14px; padding-bottom: 6px;
+  border-bottom: 3px solid var(--yellow);
+}
+
+.criterion-card {
+  background: var(--white); border: 1px solid var(--grey-light);
+  padding: 14px 16px; margin-bottom: 10px;
+}
+.criterion-head { display: flex; gap: 12px; align-items: center; margin-bottom: 6px; }
+.criterion-name { font-size: 13px; font-weight: bold; color: var(--black); }
+.criterion-badge {
+  font-size: 10px; font-weight: bold; letter-spacing: 1.5px;
+  padding: 3px 10px; border-radius: 2px;
+}
+.criterion-badge.strong { background: var(--green); color: var(--white); }
+.criterion-badge.ok { background: var(--orange); color: var(--white); }
+.criterion-badge.weak { background: var(--red); color: var(--white); }
+.criterion-comment { font-size: 13px; line-height: 1.5; color: var(--grey-dark); }
+
+.path-row { display: grid; grid-template-columns: 40px 30px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--grey-light); align-items: start; }
+.path-row:last-child { border-bottom: none; }
+.path-turn { font-size: 10px; letter-spacing: 1.5px; color: var(--grey); font-weight: bold; padding-top: 4px; }
+.path-icon { font-size: 18px; text-align: center; line-height: 1.2; }
+.path-text { font-size: 13px; line-height: 1.5; color: var(--grey-dark); }
+.path-text .quality-tag { display: block; font-size: 11px; font-weight: bold; margin-top: 4px; }
+.path-text .quality-tag.good { color: var(--green); }
+.path-text .quality-tag.ok { color: var(--orange); }
+.path-text .quality-tag.bad { color: var(--red); }
+
+.takeaway-block {
+  background: var(--black); color: var(--white);
+  padding: 20px 24px; margin-top: 28px;
+}
+.takeaway-h { color: var(--yellow); font-size: 10px; letter-spacing: 2.5px; font-weight: bold; margin-bottom: 10px; }
+.takeaway-text { font-size: 16px; font-weight: bold; line-height: 1.4; }
+
+.eval-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+
+@media (max-width: 560px) {
+  .hero { padding: 24px 20px; }
+  .hero-mod { font-size: 28px; }
+  .hero-title { font-size: 22px; }
+  .view { padding: 20px 20px 0 20px; }
+  .setup-row { grid-template-columns: 110px 1fr; }
+  .eval-score-card { flex-direction: column; align-items: start; gap: 12px; }
+  .eval-score-big { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div class="hero-tag">GAMZIX HIRING EXCELLENCE · SIMULATION</div>
+    <div class="hero-mod">MODULE 01</div>
+    <div class="hero-title">Hiring Manager Role in&nbsp;Recruitment</div>
+    <div class="hero-sub">Обери відповідь на кожному кроці. У кінці отримай фідбек.</div>
+  </div>
+  <div class="strip"></div>
+
+  <!-- SETUP -->
+  <div id="setupView" class="view">
+    <div class="picker-h">ОБЕРИ ВАКАНСІЮ, ПО ЯКІЙ ХОЧЕШ ПРАКТИКУВАТИСЬ</div>
+    <div class="scenarios" id="scenarios"></div>
+    <div id="setupCard"></div>
+    <button class="btn btn-primary btn-block" id="startBtn">ПОЧАТИ СИМУЛЯЦІЮ →</button>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatView" class="view hidden">
+    <div class="chat-bar">
+      <div class="chat-bar-meta"><b id="chatScenarioLabel"></b> · <span id="chatScenarioSubtitle"></span></div>
+      <div class="chat-bar-progress" id="chatProgress"></div>
+    </div>
+    <div class="chat-log" id="chatLog"></div>
+    <div id="choicesArea"></div>
+    <div style="display: flex; justify-content: center; margin-top: 24px;">
+      <button class="btn btn-ghost" id="restartFromChatBtn" style="padding: 8px 16px; font-size: 11px;">↺ Почати симуляцію заново</button>
+    </div>
+  </div>
+
+  <!-- EVAL -->
+  <div id="evalView" class="view hidden">
+    <div class="eval-hero">
+      <div class="eval-hero-tag">ФІДБЕК ВІД ОЛЕНИ</div>
+      <div class="eval-hero-title" id="evalScenarioTitle"></div>
+      <div class="eval-hero-sub">Розбір твоїх рішень за 4 критеріями</div>
+    </div>
+
+    <div class="eval-score-card">
+      <div class="eval-score-big" id="evalScoreBig"></div>
+      <div>
+        <div class="eval-score-label">ЗАГАЛЬНИЙ РЕЗУЛЬТАТ</div>
+        <div class="eval-score-text" id="evalScoreText"></div>
+      </div>
+    </div>
+
+    <div class="eval-section">
+      <div class="eval-section-h">ПО КОЖНОМУ КРИТЕРІЮ</div>
+      <div id="criteriaList"></div>
+    </div>
+
+    <div class="eval-section">
+      <div class="eval-section-h">ТВІЙ ШЛЯХ — ВІДПОВІДІ ПО ХОДУ РОЗМОВИ</div>
+      <div id="pathList"></div>
+    </div>
+
+    <div class="takeaway-block">
+      <div class="takeaway-h">КЛЮЧОВА ДУМКА</div>
+      <div class="takeaway-text" id="takeawayText"></div>
+    </div>
+
+    <div class="eval-actions">
+      <button class="btn btn-primary" id="restartEvalBtn">↺ ЦЕЙ СЦЕНАРІЙ ЩЕ РАЗ</button>
+      <button class="btn btn-secondary" id="newScenarioBtn">→ ОБРАТИ ІНШУ ВАКАНСІЮ</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// ============================================================
+// CRITERIA
+// ============================================================
+const CRITERIA = {
+  diag: { name: "Діагностичні питання", desc: "Чи ставив питання про конкретні моменти, дані, факти — а не «що пішло не так»" },
+  own: { name: "Визнання своєї частки", desc: "Чи прямо визнав свою частину проблеми, без «але», без перекладання" },
+  change: { name: "Конкретні зміни поведінки", desc: "Чи запропонував механізми (slots у календарі, фіксований профіль, same-day decision) — а не «постараюсь»" },
+  system: { name: "Фокус на системі", desc: "Чи дивився як на проблему процесу — а не шукав винного (кандидати, ринок, recruitment)" },
+};
+
+// ============================================================
+// SCENARIOS — повністю scripted, без живого Клода
+// ============================================================
+
+const SCENARIOS = {
+
+  // ============ BACKEND ============
+  backend: {
+    dept: "ENGINEERING",
+    label: "Senior Backend Developer",
+    subtitle: "Інженерна команда · gambling backend",
+    intro: "Вакансія Senior Backend Developer відкрита 6 тижнів. У pipeline 12 кандидатів, 3 дійшли до фіналу — всі троє пішли в інші компанії. Ти, як хайринг менеджер, попросив Олену зустрітись і розібратись.",
+    olenaOpener: "Я тут. Принесла нотатки за 6 тижнів. Слухаю.",
+    turns: [
+      // T1 — diagnostic opening
+      {
+        criterion: "diag",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Олено, перш ніж я почну ділитись думками — поділись, що ти бачиш системно за ці 6 тижнів? Які моменти на твою думку були критичні?",
+            olenaNext: "Ок. Першим — те, що болить найбільше. Олександр П., твій фаворит після технічного. Чекав на твій фідбек після фіналу 8 робочих днів. За цей час встиг отримати 2 інших офери. Прийняв LeoVegas до того, як ти повернувся з рішенням."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Розкажи, що з кандидатами — чому всі троє пішли?",
+            olenaNext: "З кандидатами по черзі. Перший — Олександр П. Чекав на твій фідбек 8 робочих днів після фіналу. Прийняв LeoVegas до того, як ти повернувся з рішенням."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "У нас зараз гарячий ринок, талантів просто мало. Може, проблема в цьому?",
+            olenaNext: "Можливо. Але перш ніж дивитись на ринок — давай подивимось на конкретні моменти. Олександр П. Чекав на твій фідбек після фіналу 8 робочих днів. Прийняв LeoVegas до того, як ти повернувся."
+          },
+        ]
+      },
+      // T2 — ownership of feedback delay
+      {
+        criterion: "own",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Так, це повністю моя зона. Я думав про Олександра, але не зафіксував своє decision у системі і не повернувся вчасно. Як зараз структуруємо процес, щоб такого не сталось знову?",
+            olenaNext: "Хороше питання. Тримаю в голові, до неї повернемось. Зараз — другий момент. На 3 тижні ти додав вимогу «production Kafka досвід» — це коштувало 9 кандидатів, які вже були у скринінгу. На 5 тижні — «gambling experience обов'язково» — pipeline впав з 23 до 7."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Так, я знаю. Тоді у мене було таке delivery — я просто фізично не встигав на все.",
+            olenaNext: "Розумію. Але delivery буває завжди — а recruitment у тебе один ось такий конкретний кандидат. Другий момент. На 3 тижні ти додав «production Kafka» — це коштувало 9 кандидатів. На 5 — «gambling обов'язково» — pipeline впав з 23 до 7."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "А чому ти йому не нагадала? Я думав, ми домовлялись, що recruiter координує тайминги.",
+            olenaNext: "Я нагадувала тричі. У понеділок, середу, п'ятницю того тижня. Я можу скинути скріншоти, якщо це допоможе. Другий момент. На 3 тижні ти додав «Kafka production» — 9 кандидатів зі скринінгу пішли. На 5 — «gambling обов'язково» — pipeline впав з 23 до 7."
+          },
+        ]
+      },
+      // T3 — concrete change after profile-changes fact
+      {
+        criterion: "change",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Ці зміни були реактивними — я думав про конкретного кандидата, а не системно про роль. Що, якщо ми фіксуємо профіль на 4 тижні і не змінюємо без формального kick-off review?",
+            olenaNext: "Робочий механізм. Третій момент. Ти 4 рази переніс інтерв'ю менш ніж за 2 години до зустрічі. Ірина М. — твій початковий фаворит — знялась після другого перенесення. Написала: «здається, я не в пріоритеті у цієї команди»."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Ну, але я ж не міг на старті знати, що мені треба буде Kafka. Це нормально, що уточнюємо.",
+            olenaNext: "Уточнення норм. Але це були не уточнення — це були додаткові must-have посеред пошуку. Це інше. Третій момент. Ти 4 рази переніс інтерв'ю менш ніж за 2 години. Ірина М. — твій початковий фаворит — знялась після другого перенесення."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "А що тут такого? Зміни — це частина процесу. Краще зрозуміти зараз, ніж потім.",
+            olenaNext: "Зміни ок, коли вони обговорюються. Тут — це додавання must-have без kick-off. 9 + 16 кандидатів — це 25 людей, яких ми відкинули за вже зробленою роботою. Третій момент. Ти 4 рази переніс інтерв'ю менш ніж за 2 години. Ірина М. знялась."
+          },
+        ]
+      },
+      // T4 — system focus on interview reschedules
+      {
+        criterion: "system",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Так. Я бачу — це сигнал, що hiring у мене лежить нижче delivery в priority stack. Що, якщо ми блокуємо interview slots у календарі за 2 тижні вперед, і я не можу їх скасувати без узгодження з тобою?",
+            olenaNext: "Дякую. Це механізм, який реально працює. Четвертий — останній момент. Я приходила тричі з market data: salary 18% нижчий за ринок, talent pool з усіма must-have менше 30 людей у LinkedIn. Щоразу ти казав «давай ще пошукаємо як є»."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я пам'ятаю той тиждень — у мене була ескалація з клієнтом. Не було вибору.",
+            olenaNext: "Один тиждень — буває. Тут — 4 рази за 6 тижнів. Це вже не одноразова ескалація — це pattern. Четвертий момент. Я приходила тричі з market data: salary 18% нижчий за ринок, talent pool менше 30 людей. Щоразу ти казав «пошукаємо як є»."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Це не я переніс, у мене Calendar Asana автоматично змістив. Це не у мене проблема.",
+            olenaNext: "Скасування через календар — це теж твоя зона. Кандидат не розрізняє, чому він отримав уведомлення за 1 годину до інтерв'ю. Четвертий момент. Я приходила тричі з market data: 18% нижчий за ринок, pool менше 30 людей. Щоразу ти казав «пошукаємо як є»."
+          },
+        ]
+      },
+      // T5 — ownership + system focus on market data
+      {
+        criterion: "own",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Ти права — я не сприйняв ці дані серйозно. Давай зараз: піднімаємо бюджет на 15%? Або зрушуємо Kafka у nice-to-have? Що дасть більший вплив на pipeline?",
+            olenaNext: "Обидва дадуть вплив, але +15% швидше — pool майже вдвічі. Перенесення Kafka — це фундаментальніше, на 6 місяців вперед. Я б брала обидва. Окей. Ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Так, я бачив ці цифри. Але я думав, що ми знайдемо когось, хто буде ок з нашим бюджетом.",
+            olenaNext: "Сподівання — це не план. Дані показували, що ні. Ок, ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Market data — це усереднено. У нас же знайшлись люди в pipeline. Просто треба ще пошукати.",
+            olenaNext: "Люди у pipeline були — і троє з них пішли в інші компанії. Це і є market data, тільки у нашому конкретному кейсі. Ок. Ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+        ]
+      },
+      // T6 — concrete change wrap-up
+      {
+        criterion: "change",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Зараз: 1) фідбек Олександру і ще двом за останні 3 дні — до кінця сьогодні. 2) Завтра — kick-off review, без зміни профілю до тих пір. 3) Бронюю tue/thu 16:00 як interview slots на 4 тижні вперед, не скасовую без узгодження. 4) Salary піднімаю на 15%, Kafka — у nice-to-have. Сходиться?",
+            olenaNext: "Сходиться. Дякую. Це конкретно і реалістично. Я завтра 10:00 повертаюсь з market refresh по новому профілю."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я постараюсь швидше давати фідбек і не змінювати профіль так часто. Подивимось, як піде.",
+            olenaNext: "Зрозуміла. «Постараюсь» — це не механізм. Я б воліла повернутись до конкретики на наступному тижні."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Давай зустрінемось через тиждень, подивимось pipeline і вирішимо тоді.",
+            olenaNext: "Через тиждень — це 5 робочих днів без рішень. У pipeline зараз 2 активних кандидати, які чекають твого фідбеку. Я б воліла діяти зараз."
+          },
+        ]
+      },
+    ],
+  },
+
+  // ============ 2D ARTIST ============
+  artist: {
+    dept: "ART / DESIGN",
+    label: "2D Artist (slot game UI)",
+    subtitle: "Креативна команда · slot games visual",
+    intro: "Вакансія 2D Artist для slot games відкрита 7 тижнів. У pipeline 9 кандидатів, 2 дійшли до тестового — обидва відмовились його виконувати, ще одна зникла після фіналу. Ти попросив Олену зустрітись.",
+    olenaOpener: "Я тут. Принесла дані за 7 тижнів. Слухаю.",
+    turns: [
+      // T1 — diagnostic opening
+      {
+        criterion: "diag",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Олено, з чого, на твою думку, варто почати? Я хочу зрозуміти системно, де ми втрачаємо кандидатів.",
+            olenaNext: "Ок. Почну з найболючішого — test task. Ти даєш «повний UI кадр slot-game з 5 елементами у нашому стилі». Анна К. і Дмитро С. написали «не приймемо» — обоє були сильні. Анна за тиждень влаштувалась у мобільну студію."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Розкажи, що з кандидатами — чому всі відмовились?",
+            olenaNext: "По черзі. Test task. Ти даєш «повний UI кадр slot-game з 5 елементами у нашому стилі». Анна К. і Дмитро С. написали «не приймемо» — обоє були сильні."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Може, проблема в тому, що 2D artists з gambling-фоном просто мало на ринку?",
+            olenaNext: "Мало, але є. Перш ніж розглядати ринок — давай подивимось на конкретні моменти. Test task. Ти даєш «повний UI кадр slot-game з 5 елементами у нашому стилі»."
+          },
+        ]
+      },
+      // T2 — ownership of test task
+      {
+        criterion: "own",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Це повністю моя зона. Я не подумав, скільки часу займає завдання — для мене це 2 години 'наброску', а для них — 15-20 годин полірування. Як скоротити — окремий UI елемент замість повного кадру?",
+            olenaNext: "Це працює. Один елемент + опис підходу — 3-4 години, достатньо, щоб побачити стиль і decision-making. Другий момент. Ти відкинув 4 portfolios одним рядком «не наш стиль». Я не можу калібрувати пошук — не знаю, що означає «наш стиль» поведінково."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Можливо тест задовгий. Але сильний artist має показати рівень — як без повного кадру?",
+            olenaNext: "Сильний artist показує рівень на 3-годинному tasku теж — це лише питання, що ми просимо показати. Другий момент. Ти відкинув 4 portfolios одним рядком «не наш стиль». Я не можу калібрувати пошук."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Якщо людина не готова витратити 15 годин на портфоліо у нас — це показує її мотивацію. Це не підходить нам.",
+            olenaNext: "Анна влаштувалась у мобільну студію за тиждень. Її «мотивація» — це знати, де її час поважають. Другий момент. Ти відкинув 4 portfolios одним рядком «не наш стиль». Я не можу калібрувати пошук."
+          },
+        ]
+      },
+      // T3 — concrete change on style calibration
+      {
+        criterion: "change",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Справедливо. Я думав, що 'наш стиль' очевидно — але це у мене в голові, не у тебе. Давай завтра я виберу 5 робіт з нашого backlog'а як reference set, і ми калібруємось по них?",
+            olenaNext: "Ідеально. З reference set я зможу швидше фільтрувати. Третій момент. Юлія В. — після фіналу чекала твій фідбек 9 робочих днів. Зникла без відповіді. Через 2 тижні з'явилась з новою позицією в Evoplay."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Та я ж пояснював на kick-off — bright, polished, gambling-oriented.",
+            olenaNext: "Bright/polished — це не калібрування. Можна сказати про 90% slot games. Третій момент. Юлія В. — після фіналу чекала твій фідбек 9 робочих днів. Зникла без відповіді. У LinkedIn з'явилась з позицією в Evoplay."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Це візуальна оцінка, її не можна описати словами. Це треба відчувати.",
+            olenaNext: "Тоді я не можу фільтрувати — я роблю це наосліп. Це означає, що ти бачиш кожне CV. Третій момент. Юлія В. — після фіналу чекала твій фідбек 9 робочих днів. Зникла. У LinkedIn з'явилась з позицією в Evoplay."
+          },
+        ]
+      },
+      // T4 — system focus on feedback delay
+      {
+        criterion: "system",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Так, я пам'ятаю Юлію. Я хотів подумати, бо вона була на межі. Має бути механізм — навіть «думаю» треба озвучити за 24 години. Що, якщо для final-stage кандидатів — same-day comm, навіть якщо це «дай мені до завтра, на якісь питання повернусь»?",
+            olenaNext: "Це працює. Same-day comm — навіть «у процесі думання» — це respect. Четвертий момент — profile. Ти просиш одночасно: cartoon style + realistic illustration + technical UI + animation basics + gambling experience. Я нарахувала 6 людей у всій Україні з усім цим, 4 недоступні."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "У мене реально не було готового рішення. Не хотів писати «так» просто щоб не мовчати.",
+            olenaNext: "Можна не казати «так» — можна сказати «потрібно ще день на думання». Це різні комунікації. Четвертий момент — profile. Ти просиш cartoon + realistic + UI + animation + gambling. 6 людей у всій Україні з усім цим, 4 недоступні."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "А Юлія ж сама зникла. Якщо була така зацікавлена — могла нагадати про себе.",
+            olenaNext: "Кандидат, який пройшов 3 етапи, не має нагадувати — це наш процес. Четвертий момент — profile. Ти просиш cartoon + realistic + UI + animation + gambling. 6 людей у всій Україні, 4 недоступні."
+          },
+        ]
+      },
+      // T5 — ownership + system on unicorn profile
+      {
+        criterion: "own",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Так, це unicorn profile. Із 5 навичок — gambling experience і UI можу залишити як must-have, інші — у nice-to-have. Така зміна реально відкриває pool?",
+            olenaNext: "Так — приблизно у 4-5 разів. Ок, ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я знаю, що це багато. Але нам реально потрібен універсальний artist — наша команда маленька.",
+            olenaNext: "Маленька команда — окремий аргумент. Але універсал коштує більше, ніж два специ. І знайти універсала — у 5 разів довше. Ок, ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Я бачив CVs з усім переліком. Просто треба краще шукати.",
+            olenaNext: "Так — і ти бачив 6 CVs за 4 місяці, 4 з яких недоступні. Це і є «краще шукати» у даних. Ок, ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+        ]
+      },
+      // T6 — concrete change wrap-up
+      {
+        criterion: "change",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "1) Завтра: я готую reference set із 5 робіт як calibration; 2) Test task переробляю — один UI елемент, 3-4 години max; 3) Same-day comm на final-stage без виключень; 4) Profile перепишемо разом завтра, прибираємо 2 must-have. Сходиться?",
+            olenaNext: "Сходиться. Дякую — це конкретно. Я готую market refresh з новим профілем до завтра."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я постараюсь швидше давати фідбек і не вимагати unrealistic profile.",
+            olenaNext: "Зрозуміла. «Постараюсь» — це слова, не механізм. Я б воліла повернутись до конкретики наступного тижня."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Давай ти приб'єш ще 5 кандидатів цього тижня, і подивимось.",
+            olenaNext: "Поточний pool — у ньому 6 людей з усім профілем, 4 недоступні. Сорсити з нічого — не вирішення."
+          },
+        ]
+      },
+    ],
+  },
+
+  // ============ ACCOUNT MANAGER ============
+  accountmanager: {
+    dept: "SALES / BUSINESS",
+    label: "Account Manager (B2B partnerships)",
+    subtitle: "Sales-команда · operator relationships",
+    intro: "Вакансія Account Manager відкрита 5 тижнів. У pipeline 14 кандидатів, 3 дійшли до фіналу — 1 пішов у конкурента, 2 знялись самостійно після твого інтерв'ю. Ти попросив Олену зустрітись.",
+    olenaOpener: "Я тут. Готова — у мене записи з 5 тижнів. Слухаю.",
+    turns: [
+      // T1 — diagnostic opening
+      {
+        criterion: "diag",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Олено, перш ніж ми розберемо кейси — поділись, що ти бачиш системно за ці 5 тижнів?",
+            olenaNext: "Окей. Починаю з найфундаментальнішого — у нас ніколи не було повноцінного kick-off. Ти сказав: «знайди мені sales-людину, побачимо по ходу». Без визначення ринку (B2B operators vs aggregators), без регіонів (LATAM/Europe/Asia), без розміру акаунтів. Я сорсила «всіх»."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Розкажи, що з кандидатами — чому всі троє пішли?",
+            olenaNext: "З кандидатами розберемось, але корінь раніше — у нас ніколи не було повноцінного kick-off. Ти сказав «знайди мені sales-людину». Без ринку, без регіонів, без розміру акаунтів. Я сорсила «всіх»."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "У нас зараз гарячий ринок, sales-кадрів просто мало. Ти ж знаєш.",
+            olenaNext: "Мало добрих — так. Але корінь раніше. У нас ніколи не було повноцінного kick-off. Ти сказав «знайди мені sales-людину». Без ринку, без регіонів, без розміру акаунтів."
+          },
+        ]
+      },
+      // T2 — ownership of no-kickoff
+      {
+        criterion: "own",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Це повністю моя. Без kick-off ми йшли всліпу. Завтра 10:00 — повний kick-off на 60 хв, я приходжу з готовими ринок/регіони/розмір. Ок?",
+            olenaNext: "Ок, зустрічаюсь. Другий момент — profile. Тиждень 1: «gambling background обов'язково». Тиждень 3: «без gambling краще, свіжий погляд». Тиждень 4: «знову gambling, але operator side, не provider». Pipeline скидався з нуля кожен раз."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Ну на старті я не знав точно, кого мені треба. Думав, побачу CVs і відчую.",
+            olenaNext: "«Побачу і відчую» — це коштувало нам 5 тижнів. Другий момент — profile. Тиждень 1: «gambling background обов'язково». Тиждень 3: «без gambling краще, свіжий погляд». Тиждень 4: «знову gambling, але operator side». Pipeline скидався з нуля кожен раз."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Я думаю, sales-роль різнопланова. Не треба занадто обмежувати на старті.",
+            olenaNext: "Я зі sales 5 років. Sales-роль для B2B operators і sales-роль для B2C aggregators — це дві різні людини. Ти або обираєш, або шукаєш обидва типи паралельно. Друге дорожче в 3 рази. Другий момент — profile. Тиждень 1: gambling обов'язково. Тиждень 3: без gambling. Тиждень 4: знову gambling."
+          },
+        ]
+      },
+      // T3 — concrete change on profile changes
+      {
+        criterion: "change",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Бачу. Це я реактивно міняв під враженням від кандидатів, а не системно. Що, якщо ми фіксуємо profile на 4 тижні мінімум, без змін без формального обговорення з тобою?",
+            olenaNext: "Працює. Третій момент. Інтерв'ю-стиль. Троє кандидатів написали — твоє інтерв'ю триває 1,5 години замість 45 хв. Ти задаєш конкретні P&L цифри операторів, з якими вони не працювали. Юлія Б. написала: «це нагадує допит, не співбесіду»."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Так, я знаю, що міняв — але кожна зміна була обґрунтована в той момент.",
+            olenaNext: "У моменті — так. Системно — це 3 зміни за 4 тижні, кожна зкидала pipeline. Третій момент. Інтерв'ю-стиль. Троє кандидатів написали — твоє інтерв'ю 1,5 години замість 45 хв. Юлія Б. написала: «це нагадує допит»."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Ринок мінливий, кандидати різні. Треба адаптуватись.",
+            olenaNext: "Адаптуватись — не те саме, що міняти must-have тричі. Третій момент. Інтерв'ю-стиль. Троє кандидатів написали — твоє інтерв'ю 1,5 години замість 45 хв. Юлія Б. написала: «це нагадує допит»."
+          },
+        ]
+      },
+      // T4 — system focus on interview style
+      {
+        criterion: "system",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Це болить. Я не думав, що це сприймається як допит. Я хотів перевірити мислення про P&L, але робив це на чужих цифрах. Що, якщо я попрошу описати P&L з одного знайомого їм клієнта замість тестувати наше? І тримаю 60 хв max?",
+            olenaNext: "Це звучить значно професійніше. Знайома компанія + 60 хв — це і повага до часу, і релевантний сигнал. Четвертий момент. Юлія Б. — найсильніша. Пройшла фінал. Чекала 5 днів. Пішла у Soft2Bet. Ти повернувся на 6-й день з рішенням «беремо»."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Ну я ж маю розуміти, чи людина мислить як sales. Без конкретних цифр це загальна розмова.",
+            olenaNext: "Конкретні цифри — так. Але цифри з її досвіду, не наших клієнтів, яких вона не знає. Це різні речі. Четвертий момент. Юлія Б. — найсильніша. Пройшла фінал. Чекала 5 днів. Пішла у Soft2Bet. Ти повернувся на 6-й день з рішенням «беремо»."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Сильний sales витримає 1,5 години інтерв'ю. Якщо не витримує — це сигнал, що людина не дотягує.",
+            olenaNext: "Юлія Б. керує $2M acquisition pipeline у Soft2Bet — вона «витримала». Просто обрала компанію, де її час поважають. Четвертий момент — про неї якраз. Юлія чекала твій фідбек 5 днів. Пішла у Soft2Bet. Ти повернувся на 6-й день з рішенням «беремо»."
+          },
+        ]
+      },
+      // T5 — ownership of feedback delay
+      {
+        criterion: "own",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "Це повністю моє. Я хотів узгодити з Sales Lead, але затягнув. Що, якщо для final-stage кандидатів — same-day decision, без виключень? Якщо потрібен alignment — це я ескалюю до Sales Lead того ж дня?",
+            olenaNext: "Це механізм. Same-day commit — навіть якщо decision «дай мені до завтра» — це respect, який вирішує половину проблем. Ок, ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Юлія дуже сподобалась, я думав уважно — не хотів швидкого «так».",
+            olenaNext: "Уважне думання — це не 5 днів мовчання. Це day-1 «думаю, повернусь за 24 години». Це різне. Ок, ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Ну вона не дочекалась, а у нас процес — це не телеграм. Має бути терпіння.",
+            olenaNext: "5 робочих днів — це не «терпіння», це normalized ghosting з нашого боку. У sales-ринку це смерть. Ок, ми пройшлись по 4 моментах. Що з твоєї сторони — наступні кроки?"
+          },
+        ]
+      },
+      // T6 — concrete change wrap-up
+      {
+        criterion: "change",
+        choices: [
+          {
+            quality: "good", score: 3,
+            text: "1) Завтра 10:00 — повний kick-off, я готовий з ринок/регіон/розмір. 2) Profile фіксую на 4 тижні, без змін без узгодження. 3) Інтерв'ю — 60 хв max, P&L через приклади їхніх клієнтів. 4) Final-stage — same-day commit, без виключень. Сходиться?",
+            olenaNext: "Сходиться. Це конкретно. До завтра."
+          },
+          {
+            quality: "ok", score: 1,
+            text: "Я постараюсь бути уважнішим до фідбеку і не змінювати профіль так часто.",
+            olenaNext: "«Постараюсь» — це не план. Я б воліла повернутись до конкретики наступного тижня."
+          },
+          {
+            quality: "bad", score: 0,
+            text: "Давай ти приведеш ще 5 кандидатів цього тижня, і подивимось.",
+            olenaNext: "Без kick-off — це знову буде «всі». Я не сорсю далі, поки ми не зробимо kick-off."
+          },
+        ]
+      },
+    ],
+  },
+};
+
+// ============================================================
+// STATE
+// ============================================================
+
+const STORAGE_KEY = "gamzix_m1_sim_v3";
+
+let state = {
+  scenario: "backend",
+  view: "setup",
+  step: 0, // 0-based turn index
+  messages: [], // {role: 'olena' | 'hm', text}
+  choices: [], // {turn, choiceIdx, quality, score, criterion}
+};
+
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    if (saved.scenario && saved.view) {
+      state = { ...state, ...saved };
+    }
+  } catch (e) {}
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function resetSession(scenario) {
+  state.scenario = scenario || state.scenario;
+  state.view = "setup";
+  state.step = 0;
+  state.messages = [];
+  state.choices = [];
+  saveState();
+  render();
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+
+function el(id) { return document.getElementById(id); }
+function escapeHtml(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function renderScenarios() {
+  el("scenarios").innerHTML = Object.entries(SCENARIOS).map(([key, s]) => `
+    <div class="scenario-card ${state.scenario === key ? "active" : ""}" data-scenario="${key}">
+      <div class="scenario-dept">${s.dept}</div>
+      <div class="scenario-title">${escapeHtml(s.label)}</div>
+      <div class="scenario-sub">${escapeHtml(s.subtitle)}</div>
+    </div>
+  `).join("");
+  document.querySelectorAll(".scenario-card").forEach(card => {
+    card.addEventListener("click", () => {
+      state.scenario = card.dataset.scenario;
+      saveState();
+      render();
+    });
+  });
+}
+
+function renderSetup() {
+  const s = SCENARIOS[state.scenario];
+  renderScenarios();
+  el("setupCard").innerHTML = `
+    <div class="setup-meta">
+      <div class="setup-row">
+        <div class="setup-row-label">Хто Олена</div>
+        <div class="setup-row-value">Senior Recruiter у твоїй команді</div>
+      </div>
+      <div class="setup-row">
+        <div class="setup-row-label">Хто ти</div>
+        <div class="setup-row-value">Хайринг менеджер у GAMZIX</div>
+      </div>
+      <div class="setup-row">
+        <div class="setup-row-label">Як це працює</div>
+        <div class="setup-row-value">6 кроків. На кожному — Олена ділиться спостереженням, ти обираєш одну з 3 відповідей. У кінці — структурований фідбек за 4 критеріями.</div>
+      </div>
+      <div class="setup-row">
+        <div class="setup-row-label">Тривалість</div>
+        <div class="setup-row-value">~10 хвилин</div>
+      </div>
+    </div>
+    <div class="setup-intro">
+      <div class="setup-intro-h">СЦЕНАРІЙ</div>
+      ${escapeHtml(s.intro)}
+    </div>
+  `;
+}
+
+function renderChat() {
+  const s = SCENARIOS[state.scenario];
+  el("chatScenarioLabel").textContent = s.label;
+  el("chatScenarioSubtitle").textContent = s.subtitle;
+  el("chatProgress").textContent = `КРОК ${Math.min(state.step + 1, s.turns.length)} / ${s.turns.length}`;
+
+  const log = el("chatLog");
+  log.innerHTML = "";
+  state.messages.forEach(m => {
+    const msg = document.createElement("div");
+    msg.className = "msg " + (m.role === "olena" ? "olena" : "hm");
+    msg.innerHTML = `
+      <div class="msg-from">${m.role === "olena" ? "Олена" : "Ти (хайринг менеджер)"}</div>
+      <div class="msg-body">${escapeHtml(m.text)}</div>
+    `;
+    log.appendChild(msg);
+  });
+
+  const choicesArea = el("choicesArea");
+  if (state.step >= s.turns.length) {
+    // All turns done — show "see feedback" button
+    choicesArea.innerHTML = `
+      <div style="text-align: center; margin-top: 24px;">
+        <button class="btn btn-primary" id="seeFeedbackBtn">↓ ОТРИМАТИ ФІДБЕК ВІД ОЛЕНИ ↓</button>
+      </div>
+    `;
+    el("seeFeedbackBtn").addEventListener("click", showEvaluation);
+    return;
+  }
+
+  const turn = s.turns[state.step];
+  const letters = ["A", "B", "C"];
+
+  // Shuffle choices to avoid pattern recognition? Actually keep order for predictability across re-tries
+  choicesArea.innerHTML = `
+    <div class="choices-block">
+      <div class="choices-prompt">ЯК ТИ ВІДПОВІДАЄШ ОЛЕНІ?</div>
+      ${turn.choices.map((c, i) => `
+        <div class="choice" data-choice="${i}">
+          <div class="choice-letter">${letters[i]}</div>
+          <div class="choice-text">${escapeHtml(c.text)}</div>
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  document.querySelectorAll(".choice").forEach(div => {
+    div.addEventListener("click", () => {
+      const idx = parseInt(div.dataset.choice, 10);
+      handleChoice(idx);
+    });
+  });
+
+  log.scrollTop = log.scrollHeight;
+  setTimeout(() => { window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }); }, 50);
+}
+
+function renderEvalView() {
+  const s = SCENARIOS[state.scenario];
+  el("evalScenarioTitle").textContent = s.label;
+
+  // Compute total score
+  const totalMax = s.turns.length * 3;
+  const totalScore = state.choices.reduce((sum, c) => sum + c.score, 0);
+  const pct = Math.round((totalScore / totalMax) * 100);
+
+  let overallGrade = "WEAK", overallText = "";
+  if (pct >= 80) { overallGrade = "STRONG"; overallText = "Ти провів цю розмову як зрілий хайринг менеджер. Конкретні питання, визнання факту, конкретні механізми."; }
+  else if (pct >= 50) { overallGrade = "OK"; overallText = "Є хороші моменти, але не всюди ти заходиш у системне рішення. Подивись, де було «постараюсь» замість механізму."; }
+  else { overallGrade = "WEAK"; overallText = "Поки що домінує захист — виправдання, перекладання, загальні фрази. Пройди симуляцію ще раз, читаючи варіанти уважно."; }
+
+  el("evalScoreBig").innerHTML = `${pct}<span style="font-size: 20px;">%</span>`;
+  el("evalScoreText").textContent = overallText;
+
+  // Per-criterion
+  const critScores = { diag: [], own: [], change: [], system: [] };
+  state.choices.forEach(c => {
+    if (critScores[c.criterion]) critScores[c.criterion].push(c.score);
+  });
+
+  el("criteriaList").innerHTML = Object.entries(CRITERIA).map(([key, c]) => {
+    const scores = critScores[key] || [];
+    if (scores.length === 0) return "";
+    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+    let badge, badgeClass, comment;
+    if (avg >= 2.5) {
+      badge = "STRONG"; badgeClass = "strong";
+      comment = goodComment(key);
+    } else if (avg >= 1.5) {
+      badge = "OK"; badgeClass = "ok";
+      comment = okComment(key);
+    } else {
+      badge = "WEAK"; badgeClass = "weak";
+      comment = weakComment(key);
+    }
+    return `
+      <div class="criterion-card">
+        <div class="criterion-head">
+          <div class="criterion-name">${c.name}</div>
+          <div class="criterion-badge ${badgeClass}">${badge}</div>
+        </div>
+        <div class="criterion-comment">${escapeHtml(comment)}</div>
+      </div>
+    `;
+  }).join("");
+
+  // Path
+  el("pathList").innerHTML = state.choices.map((c, i) => {
+    const icon = c.quality === "good" ? "✓" : (c.quality === "ok" ? "~" : "✗");
+    const cls = c.quality === "good" ? "good" : (c.quality === "ok" ? "ok" : "bad");
+    const annotation = pathAnnotation(c.quality, c.criterion);
+    return `
+      <div class="path-row">
+        <div class="path-turn">КРОК ${i+1}</div>
+        <div class="path-icon" style="color: var(--${c.quality==='good'?'green':c.quality==='ok'?'orange':'red'});">${icon}</div>
+        <div class="path-text">
+          ${escapeHtml(c.text)}
+          <span class="quality-tag ${cls}">${annotation}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Takeaway
+  el("takeawayText").textContent = takeawayText(pct);
+}
+
+function goodComment(key) {
+  const map = {
+    diag: "Ти ставив питання, які допомагали виявити системні причини, а не загальні «що пішло не так». Це ознака зрілого хайринг менеджера — почати з даних, не з власних висновків.",
+    own: "Ти прямо визнавав свою частину проблеми, без «але» і без перекладання на обставини. Це базис будь-якої корекції — без цього зміни не приживаються.",
+    change: "Твої пропозиції — це механізми, а не обіцянки. «Блокую slots у календарі», «фіксую profile на 4 тижні», «same-day commit без виключень» — це конкретно і перевіряється.",
+    system: "Ти дивишся на recruitment як на процес, який можна налаштувати. Не шукаєш винного — шукаєш, що змінити у системі. Це найважливіша ментальна модель хайринг менеджера.",
+  };
+  return map[key];
+}
+function okComment(key) {
+  const map = {
+    diag: "Подекуди ти ставив правильні питання, але інколи стрибав у висновки замість того, щоб слухати. На наступний раз — почни з «що ти бачиш системно?», перш ніж пропонувати рішення.",
+    own: "Ти признав частину, але деколи з «але» — «це моя зона, але delivery / але не було часу». Спробуй визнавати без виправдань — це швидше повертає довіру.",
+    change: "Деякі твої пропозиції — конкретні, деякі — «постараюсь». Олена не може вірити словам — вона вірить механізмам. Кожна обіцянка має мати «як я це перевірю».",
+    system: "Подекуди ти шукав, кого винити (ринок / recruiter / кандидата). Інколи — повертався до системи. Старайся щоразу запитувати себе: «що у процесі дозволило цьому статись?»",
+  };
+  return map[key];
+}
+function weakComment(key) {
+  const map = {
+    diag: "Ти переважно йшов у «треба підняти бюджет», «треба більше сорсити», «це ринок» — без зануренного в дані. Спробуй спочатку слухати — це коштує 10 хв і економить тижні.",
+    own: "Ти переважно заперечував або перекладав («це календар сам», «recruiter мав нагадати», «кандидат сам зник»). Це закриває розмову про реальні зміни.",
+    change: "Твої пропозиції — це переважно «постараюсь», «буду уважніше», «подивимось через тиждень». Це не плани — це слова, які нічого не змінять.",
+    system: "Ти переважно шукав винного: кандидати слабкі, ринок поганий, recruiter недопрацював. Системний погляд означає: «що у моєму процесі це дозволило?»",
+  };
+  return map[key];
+}
+
+function pathAnnotation(quality, criterion) {
+  if (quality === "good") {
+    return ({
+      diag: "✓ Діагностичне питання",
+      own: "✓ Визнання факту без виправдань",
+      change: "✓ Конкретний механізм",
+      system: "✓ Системний фокус",
+    })[criterion] || "✓ Сильна відповідь";
+  }
+  if (quality === "ok") {
+    return ({
+      diag: "~ Часткове, з прижатим виправданням",
+      own: "~ Визнання з «але»",
+      change: "~ «Постараюсь» замість механізму",
+      system: "~ Частково на системі",
+    })[criterion] || "~ Серединне";
+  }
+  return ({
+    diag: "✗ Стрибок у висновки замість даних",
+    own: "✗ Перекладання / заперечення",
+    change: "✗ Без конкретики",
+    system: "✗ Пошук винного",
+  })[criterion] || "✗ Слабка відповідь";
+}
+
+function takeawayText(pct) {
+  if (pct >= 80) return "Recruitment — це shared system. Ти зараз дієш у цьому модусі. Тримай так — і твій time-to-hire буде падати з кожною ітерацією.";
+  if (pct >= 50) return "Recruitment — це shared system. Ти на пів-шляху до цього. Слідкуй за моментами, де «постараюсь» замінює механізм — там основні точки зростання.";
+  return "Recruitment — це не «їхня робота». Це shared system, де ти контролюєш 60% результату. Пройди симуляцію ще раз — цього разу читай ВСІ 3 варіанти, перш ніж обрати.";
+}
+
+function render() {
+  el("setupView").classList.toggle("hidden", state.view !== "setup");
+  el("chatView").classList.toggle("hidden", state.view !== "chat");
+  el("evalView").classList.toggle("hidden", state.view !== "eval");
+
+  if (state.view === "setup") renderSetup();
+  if (state.view === "chat") renderChat();
+  if (state.view === "eval") renderEvalView();
+}
+
+// ============================================================
+// FLOW
+// ============================================================
+
+function startSession() {
+  const s = SCENARIOS[state.scenario];
+  state.view = "chat";
+  state.step = 0;
+  state.messages = [{ role: "olena", text: s.olenaOpener }];
+  state.choices = [];
+  saveState();
+  render();
+}
+
+function handleChoice(idx) {
+  const s = SCENARIOS[state.scenario];
+  const turn = s.turns[state.step];
+  const choice = turn.choices[idx];
+
+  // Record
+  state.choices.push({
+    turn: state.step,
+    choiceIdx: idx,
+    text: choice.text,
+    quality: choice.quality,
+    score: choice.score,
+    criterion: turn.criterion,
+  });
+
+  // Add HM message
+  state.messages.push({ role: "hm", text: choice.text });
+
+  // Add Olena's next message
+  state.messages.push({ role: "olena", text: choice.olenaNext });
+
+  // Advance
+  state.step += 1;
+  saveState();
+  render();
+}
+
+function showEvaluation() {
+  state.view = "eval";
+  saveState();
+  render();
+}
+
+// ============================================================
+// EVENT WIRING
+// ============================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadState();
+  render();
+
+  el("startBtn").addEventListener("click", startSession);
+
+  el("restartFromChatBtn").addEventListener("click", () => {
+    if (confirm("Почати симуляцію заново? Поточний прогрес буде втрачено.")) {
+      resetSession(state.scenario);
+    }
+  });
+  el("restartEvalBtn").addEventListener("click", () => { resetSession(state.scenario); });
+  el("newScenarioBtn").addEventListener("click", () => { resetSession(); });
+});
+</script>
+</body>
+</html>
