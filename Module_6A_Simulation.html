@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAMZIX · Модуль 06 · Фінальний дзвінок</title>
+<style>
+:root {
+  color-scheme: light;
+  --yellow: #F5CE00;
+  --yellow-soft: #FFF6CC;
+  --yellow-bg: #FFFCED;
+  --black: #0B0B0B;
+  --white: #FFFFFF;
+  --grey-dark: #333333;
+  --grey: #595959;
+  --grey-light: #D9D9D9;
+  --grey-bg: #F5F5F5;
+  --red: #C00000;
+  --red-bg: #FFE5E5;
+  --green: #2D7A2D;
+  --green-bg: #E6F4E6;
+  --orange: #B86E00;
+  --orange-bg: #FFF1D9;
+  --font: "Century Gothic", "Avant Garde", "Trebuchet MS", "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  background: var(--white); color: var(--black);
+  font-family: var(--font); font-size: 15px; line-height: 1.55;
+}
+.app { max-width: 720px; margin: 0 auto; padding: 0 0 60px 0; }
+.hero { background: var(--black); color: var(--white); padding: 32px 32px 28px 32px; }
+.hero-tag { color: var(--yellow); font-size: 11px; letter-spacing: 3px; font-weight: bold; margin-bottom: 16px; }
+.hero-mod { color: var(--yellow); font-size: 32px; font-weight: bold; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+.hero-title { color: var(--white); font-size: 26px; font-weight: bold; line-height: 1.15; margin-bottom: 12px; }
+.hero-sub { color: var(--white); opacity: 0.7; font-size: 13px; font-style: italic; }
+.strip { height: 8px; background: var(--yellow); }
+.view { padding: 28px 32px 0 32px; }
+.view.hidden { display: none; }
+
+.setup-intro {
+  background: var(--yellow-soft); border-left: 6px solid var(--yellow);
+  padding: 18px 22px; font-size: 14px; line-height: 1.6; margin-bottom: 24px;
+}
+.setup-intro-h { font-size: 10px; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; }
+.candidate-card {
+  border: 2px solid var(--black); padding: 20px 22px; margin-bottom: 24px;
+  display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start;
+}
+.candidate-avatar {
+  width: 52px; height: 52px; background: var(--yellow);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: bold; color: var(--black); flex-shrink: 0;
+}
+.candidate-name { font-size: 17px; font-weight: bold; margin-bottom: 4px; }
+.candidate-role { font-size: 12px; letter-spacing: 1.5px; color: var(--grey); margin-bottom: 10px; }
+.candidate-facts { font-size: 13px; color: var(--grey-dark); line-height: 1.6; }
+.candidate-facts strong { color: var(--black); }
+.situation-block {
+  background: var(--grey-bg); padding: 16px 20px; margin-bottom: 24px; font-size: 13.5px; line-height: 1.65;
+}
+.situation-block-h { font-size: 10px; font-weight: bold; letter-spacing: 2px; margin-bottom: 8px; color: var(--grey); }
+
+.btn {
+  font-family: var(--font); font-weight: bold; letter-spacing: 1.5px;
+  cursor: pointer; border: none; padding: 14px 28px; font-size: 13px; transition: all 0.15s;
+}
+.btn-primary { background: var(--black); color: var(--yellow); }
+.btn-primary:hover:not(:disabled) { background: #222; }
+.btn-ghost { background: transparent; color: var(--grey); border: 1px solid var(--grey-light); }
+.btn-ghost:hover:not(:disabled) { color: var(--black); border-color: var(--black); }
+.btn-block { display: block; width: 100%; }
+
+.progress-bar-wrap { height: 4px; background: var(--grey-light); margin-bottom: 22px; position: relative; }
+.progress-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--yellow); transition: width 0.4s; }
+.turn-label { font-size: 11px; letter-spacing: 2px; font-weight: bold; color: var(--grey); margin-bottom: 16px; }
+
+.rapport-wrap { margin-bottom: 22px; }
+.rapport-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; letter-spacing: 1.5px; font-weight: bold; margin-bottom: 6px;
+}
+.rapport-label-text { color: var(--grey); }
+.rapport-label-value { color: var(--black); }
+.rapport-track { height: 8px; background: var(--grey-light); position: relative; overflow: hidden; }
+.rapport-fill { position: absolute; left: 0; top: 0; bottom: 0; transition: width 0.5s, background 0.5s; }
+
+.candidate-bubble-wrap { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 20px; }
+.bubble-avatar {
+  width: 36px; height: 36px; background: var(--yellow); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: bold; color: var(--black);
+}
+.bubble-name { font-size: 11px; letter-spacing: 1.5px; font-weight: bold; color: var(--grey); margin-bottom: 6px; }
+.bubble { background: var(--grey-bg); padding: 14px 18px; font-size: 14.5px; line-height: 1.6; color: var(--black); border-left: 3px solid var(--grey-light); }
+
+.options-label { font-size: 10px; letter-spacing: 2px; font-weight: bold; color: var(--grey); margin-bottom: 10px; }
+.options-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.option-btn {
+  border: 2px solid var(--grey-light); background: var(--white);
+  padding: 14px 18px; text-align: left; cursor: pointer;
+  font-family: var(--font); font-size: 13.5px; line-height: 1.5; color: var(--black);
+  transition: all 0.15s; display: flex; gap: 12px; align-items: flex-start;
+}
+.option-btn:hover:not(:disabled) { border-color: var(--black); background: var(--grey-bg); }
+.option-btn:disabled { cursor: default; }
+.option-letter { font-size: 12px; font-weight: bold; letter-spacing: 1px; min-width: 20px; color: var(--grey); padding-top: 1px; }
+.option-text { flex: 1; }
+.option-btn.selected.strong { border-color: var(--green); background: var(--green-bg); }
+.option-btn.selected.strong .option-letter { color: var(--green); }
+.option-btn.selected.weak   { border-color: var(--orange); background: var(--orange-bg); }
+.option-btn.selected.weak   .option-letter { color: var(--orange); }
+.option-btn.selected.wrong  { border-color: var(--red); background: var(--red-bg); }
+.option-btn.selected.wrong  .option-letter { color: var(--red); }
+.option-btn.dim { opacity: 0.3; }
+
+.reaction-wrap { margin-bottom: 18px; }
+.reaction-bubble-wrap { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+.reaction-bubble { background: var(--grey-bg); padding: 12px 16px; font-size: 13.5px; line-height: 1.6; color: var(--black); border-left: 3px solid var(--grey-light); font-style: italic; flex: 1; }
+.explanation-block { padding: 14px 18px; margin-bottom: 4px; border-left: 6px solid var(--grey); font-size: 13px; line-height: 1.65; }
+.explanation-block.strong { background: var(--green-bg); border-color: var(--green); }
+.explanation-block.weak   { background: var(--orange-bg); border-color: var(--orange); }
+.explanation-block.wrong  { background: var(--red-bg); border-color: var(--red); }
+.explanation-h { font-size: 11px; letter-spacing: 2px; font-weight: bold; margin-bottom: 6px; }
+.explanation-block.strong .explanation-h { color: var(--green); }
+.explanation-block.weak   .explanation-h { color: var(--orange); }
+.explanation-block.wrong  .explanation-h { color: var(--red); }
+.explanation-text { color: var(--grey-dark); }
+.explanation-text strong { color: var(--black); }
+.next-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+.outcome-card { padding: 24px 28px; margin-bottom: 24px; border: 3px solid var(--black); }
+.outcome-card.accepted { border-color: var(--green); background: var(--green-bg); }
+.outcome-card.followup { border-color: var(--orange); background: var(--orange-bg); }
+.outcome-card.declined { border-color: var(--red); background: var(--red-bg); }
+.outcome-icon { font-size: 36px; margin-bottom: 8px; }
+.outcome-tag { font-size: 10px; letter-spacing: 2.5px; font-weight: bold; margin-bottom: 6px; }
+.outcome-card.accepted .outcome-tag { color: var(--green); }
+.outcome-card.followup .outcome-tag { color: var(--orange); }
+.outcome-card.declined .outcome-tag { color: var(--red); }
+.outcome-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: var(--black); }
+.outcome-text { font-size: 13.5px; line-height: 1.65; color: var(--grey-dark); }
+.outcome-text strong { color: var(--black); }
+
+.score-card { background: var(--yellow); padding: 20px 24px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center; }
+.score-big { font-size: 56px; font-weight: bold; line-height: 1; color: var(--black); }
+.score-big-sub { font-size: 22px; }
+.score-label { font-size: 11px; letter-spacing: 2px; color: var(--black); font-weight: bold; margin-bottom: 4px; }
+.score-text { font-size: 14px; color: var(--black); }
+.section-h { font-size: 13px; letter-spacing: 2px; font-weight: bold; margin-bottom: 14px; padding-bottom: 6px; border-bottom: 3px solid var(--yellow); }
+.debrief-card { background: var(--white); border: 1px solid var(--grey-light); padding: 14px 16px; margin-bottom: 10px; }
+.debrief-card-h { font-size: 13px; font-weight: bold; color: var(--black); margin-bottom: 6px; }
+.debrief-card-body { font-size: 13px; line-height: 1.55; color: var(--grey-dark); }
+.debrief-card-body strong { color: var(--black); }
+.rules-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+.rules-row { display: grid; grid-template-columns: 130px 1fr; gap: 0; border-bottom: 1px solid var(--grey-light); }
+.rules-row:last-child { border-bottom: none; }
+.rules-cell { padding: 10px 14px; font-size: 12.5px; }
+.rules-cell:first-child { background: var(--black); color: var(--yellow); font-weight: bold; font-size: 11px; letter-spacing: 1px; display: flex; align-items: center; }
+.rules-cell:last-child { color: var(--grey-dark); line-height: 1.55; }
+.takeaway-block { background: var(--black); color: var(--white); padding: 20px 24px; margin-top: 24px; }
+.takeaway-h { color: var(--yellow); font-size: 10px; letter-spacing: 2.5px; font-weight: bold; margin-bottom: 10px; }
+.takeaway-text { font-size: 16px; font-weight: bold; line-height: 1.4; }
+.results-actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+
+@media (max-width: 560px) {
+  .hero, .view { padding-left: 20px; padding-right: 20px; }
+  .hero-mod { font-size: 26px; }
+  .hero-title { font-size: 20px; }
+  .candidate-card { grid-template-columns: 1fr; }
+  .score-card { flex-direction: column; gap: 12px; }
+  .rules-row { grid-template-columns: 100px 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hero">
+    <div class="hero-tag">GAMZIX HIRING EXCELLENCE · СИМУЛЯЦІЯ</div>
+    <div class="hero-mod">МОДУЛЬ 06</div>
+    <div class="hero-title">Фінальний дзвінок</div>
+    <div class="hero-sub">5 ходів · реальний діалог з кандидатом · ~7 хвилин</div>
+  </div>
+  <div class="strip"></div>
+
+  <!-- SETUP -->
+  <div id="setupView" class="view">
+    <div class="setup-intro">
+      <div class="setup-intro-h">ЯК ЦЕ ПРАЦЮЄ</div>
+      Ти — хайринг менеджер на фінальному дзвінку. Кандидат отримав твій офер, але вагається. Розмова йде 5 ходів. Після кожної відповіді побачиш реакцію кандидата і розбір. В кінці — результат: кандидат прийняв, відклав або відмовився.
+    </div>
+
+    <div class="candidate-card">
+      <div class="candidate-avatar">АН</div>
+      <div>
+        <div class="candidate-name">Аня Коваль</div>
+        <div class="candidate-role">SENIOR GAME DESIGNER · ОФЕР ОЧІКУЄ ВІДПОВІДІ</div>
+        <div class="candidate-facts">
+          <strong>Що відомо:</strong> 5 років досвіду, фінальне інтерв'ю пройшло добре. Твій рекрутер каже — вона сильний кандидат, один із найкращих за 2 місяці пошуку. <strong>Ти надіслав офер у п'ятницю ввечері.</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="situation-block">
+      <div class="situation-block-h">СИТУАЦІЯ</div>
+      Зараз понеділок, 11:00. Рекрутер каже: «Аня хоче поговорити — є питання після офера». Ти телефонуєш. Є 20–30 хвилин. Аня відповідає.
+    </div>
+
+    <button class="btn btn-primary btn-block" id="startBtn">ПОЧАТИ ДЗВІНОК →</button>
+  </div>
+
+  <!-- CALL -->
+  <div id="callView" class="view hidden">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%;"></div>
+    </div>
+
+    <div class="rapport-wrap">
+      <div class="rapport-label">
+        <span class="rapport-label-text">РІВЕНЬ ДОВІРИ</span>
+        <span class="rapport-label-value" id="rapportValue">50%</span>
+      </div>
+      <div class="rapport-track">
+        <div class="rapport-fill" id="rapportFill" style="width:50%;background:#F5CE00;"></div>
+      </div>
+    </div>
+
+    <div class="turn-label" id="turnLabel">ХІД 1 З 5</div>
+    <div id="chatArea"></div>
+    <div id="optionsArea"></div>
+    <div id="reactionArea"></div>
+    <div id="nextArea"></div>
+
+    <div style="display:flex;justify-content:center;margin-top:24px;">
+      <button class="btn btn-ghost" id="restartCallBtn" style="padding:8px 16px;font-size:11px;">↺ Почати заново</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsView" class="view hidden">
+    <div style="background:var(--black);color:var(--white);padding:24px 28px;margin-bottom:24px;">
+      <div style="color:var(--yellow);font-size:11px;letter-spacing:3px;font-weight:bold;margin-bottom:10px;">ФІНАЛЬНИЙ ДЗВІНОК · РЕЗУЛЬТАТ</div>
+      <div style="font-size:22px;font-weight:bold;">Як пройшов твій дзвінок</div>
+    </div>
+    <div id="outcomeArea"></div>
+    <div class="score-card">
+      <div class="score-big" id="finalScore"></div>
+      <div>
+        <div class="score-label">СИЛЬНИХ ХОДІВ</div>
+        <div class="score-text" id="finalText"></div>
+      </div>
+    </div>
+    <div class="section-h">РОЗБІР ДЗВІНКА</div>
+    <div id="debriefList"></div>
+    <div class="section-h" style="margin-top:24px;">СТРУКТУРА СИЛЬНОГО ФІНАЛЬНОГО ДЗВІНКА</div>
+    <div class="rules-grid">
+      <div class="rules-row">
+        <div class="rules-cell">СПОЧАТКУ СЛУХАЙ</div>
+        <div class="rules-cell">Перший хід — питання, не презентація. «Що для тебе зараз найважливіше?» до того як щось продавати.</div>
+      </div>
+      <div class="rules-row">
+        <div class="rules-cell">НЕ ЗАРПЛАТА</div>
+        <div class="rules-cell">Зарплата — не твоя тема на фінальному дзвінку. Якщо кандидат піднімає цифри — поверни рекрутеру. Ти продаєш команду, роль, зростання, вплив.</div>
+      </div>
+      <div class="rules-row">
+        <div class="rules-cell">КОНКРЕТИКА</div>
+        <div class="rules-cell">Не «у нас багато можливостей». А: «Ось [ім'я] прийшов на цю роль рік тому, зараз лід». Реальні приклади у рази переконливіші.</div>
+      </div>
+      <div class="rules-row">
+        <div class="rules-cell">ВІДКРИТІСТЬ</div>
+        <div class="rules-cell">Якщо кандидат каже про незручне — не захищайся. Дякуй за чесність, заповни прогалину фактами.</div>
+      </div>
+      <div class="rules-row">
+        <div class="rules-cell">ЗАКРИТТЯ</div>
+        <div class="rules-cell">Не «жди на рішення». А: «Що ще тобі потрібно для рішення — чи є щось, де я можу допомогти зараз?»</div>
+      </div>
+    </div>
+    <div class="takeaway-block">
+      <div class="takeaway-h">КЛЮЧОВА ДУМКА</div>
+      <div class="takeaway-text" id="takeawayText"></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn btn-primary" id="restartResultsBtn">↺ ПРОЙТИ ЩЕ РАЗ</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const TURNS = [
+  {
+    id: 1,
+    candidateSays: "Привіт. Дякую, що зателефонував. Я прочитала офер... є кілька речей, які хочу обговорити.",
+    options: [
+      {
+        letter: "A", type: "wrong",
+        text: "Звичайно, Аня! Сподіваюсь офер сподобався. Які питання по умовах?",
+        reaction: "«Ну... загалом умови ок. Є кілька питань...» *(голос трохи скутий)*",
+        explanation: {
+          h: "СЛАБКИЙ СТАРТ",
+          body: "<strong>Ти одразу перейшов до умов</strong> — немов це транзакція, а не розмова. Кандидат відчуває, що ти хочеш «закрити питання», а не почути її. Перший хід має бути запитанням, не відповіддю."
+        }
+      },
+      {
+        letter: "Б", type: "strong",
+        text: "Аня, радий почути. Перш ніж до деталей — як ти загалом після нашого інтерв'ю? Що для тебе зараз найважливіше при виборі?",
+        reaction: "«О, дякую за запитання. Насправді... є кілька речей, які справді важливі для мене прямо зараз.» *(голос розслабився)*",
+        explanation: {
+          h: "СИЛЬНИЙ СТАРТ",
+          body: "<strong>Ти почав із запитання, а не з продажу.</strong> Це одразу сигналізує: тебе цікавить вона, а не закриття позиції. Кандидат відкривається — і ти отримуєш інформацію, що допоможе тобі продавати саме те, що їй важливо."
+        }
+      },
+      {
+        letter: "В", type: "weak",
+        text: "Аня, я радий що ти зателефонувала. Хочу розповісти про нашу команду і можливості, які ми пропонуємо...",
+        reaction: "«Е... добре, слухаю.» *(пасивно)*",
+        explanation: {
+          h: "МОНОЛОГ ЗАМІСТЬ ДІАЛОГУ",
+          body: "Ти почав із презентації компанії до того, як дізнався, що її реально цікавить. <strong>Фінальний дзвінок — це не презентація.</strong> Якщо продаєш не те, що важливо кандидату, — він не купить, навіть якщо все правда."
+        }
+      }
+    ]
+  },
+  {
+    id: 2,
+    candidateSays: "Знаєш, я маю ще один офер. Теж цікава компанія, ігрова студія. Намагаюсь зрозуміти, де буде більше зростання для мене як дизайнера...",
+    options: [
+      {
+        letter: "A", type: "wrong",
+        text: "Скільки вони пропонують? Можемо подивитись по цифрах, у нас є гнучкість.",
+        reaction: "«Ну... вони пропонують X. Але мені не тільки про гроші...» *(трохи здивована)*",
+        explanation: {
+          h: "ПЕРЕВІВ У ЗАРПЛАТУ",
+          body: "<strong>Кандидат сказала про зростання — ти почув гроші.</strong> Це класична пастка. Якщо починаєш торгуватись по цифрах до того, як зрозумів її справжній мотиватор — ти продаєш не те. І сигналізуєш, що компанія = транзакція."
+        }
+      },
+      {
+        letter: "Б", type: "strong",
+        text: "Розумію. Зростання — це серйозне питання. Розкажи мені — що конкретно ти маєш на увазі: хочеш рости вглиб як дизайнер, чи тебе цікавить менеджмент, чи щось інше?",
+        reaction: "«Дякую, що запитав. Мені важливо... мати більше самостійності в рішеннях — не просто виконувати задачі. Я хочу відчувати, що мій внесок справді помітний.»",
+        explanation: {
+          h: "УТОЧНИВ МОТИВАТОР",
+          body: "<strong>Відмінно.</strong> Замість того щоб одразу продавати «у нас є зростання» — ти уточнив, що саме вона має на увазі. Тепер ти знаєш: їй важлива самостійність і вплив, а не просто «більше грошей» чи «гарний офіс». Продавай саме це."
+        }
+      },
+      {
+        letter: "В", type: "weak",
+        text: "У нас теж дуже хороші можливості для зростання. Команда молода, ми ростемо, буде багато нового.",
+        reaction: "«Ну... це звучить непогано, але я чула це від кількох компаній.» *(скептично)*",
+        explanation: {
+          h: "ПОРОЖНІЙ ПРОДАЖ",
+          body: "«Молода команда, ростемо, буде багато нового» — <strong>це чують всюди.</strong> Кандидат це знає. Без конкретики і без розуміння, що саме вона шукає — ця фраза не додає довіри, вона забирає."
+        }
+      }
+    ]
+  },
+  {
+    id: 3,
+    candidateSays: "Мені важливо розуміти — куди я можу вирости звідси. В іншій компанії показали чіткий кар'єрний шлях: через 1.5 роки можна стати лід-дизайнером. У вас... не дуже зрозуміло.",
+    options: [
+      {
+        letter: "A", type: "weak",
+        text: "У нас теж є можливості для зростання. Ми дуже цінуємо сильних дизайнерів і завжди готові обговорити кар'єрний шлях.",
+        reaction: "«Зрозуміло... А є якийсь конкретний приклад?» *(не переконана)*",
+        explanation: {
+          h: "ЗАГАЛЬНІ СЛОВА",
+          body: "<strong>«Цінуємо і готові обговорити»</strong> — це не відповідь. Конкурент показав конкретний шлях. Ти відповів декларацією намірів. Кандидат бачить різницю між «є можливості» і реальним прикладом людини, яка виросла."
+        }
+      },
+      {
+        letter: "Б", type: "strong",
+        text: "Справедливе питання. Конкретно: Ліза прийшла до нас рік тому на схожу роль, зараз веде напрямок інтерфейсу для нового проєкту — повна самостійність. Антон за 2 роки виріс до ліда. Що тобі ближче — вглиб по майстерності чи в менеджмент?",
+        reaction: "«О. Це вже звучить реальніше. Мені ближче вглиб — я не дуже хочу в менеджмент.» *(тепліше)*",
+        explanation: {
+          h: "КОНКРЕТНІ ПРИКЛАДИ",
+          body: "<strong>Реальні імена і реальні кейси</strong> переконують у рази краще ніж обіцянки. Ти не тільки показав зростання — ти продовжив уточнювати її мотиватор. Тепер знаєш: їй потрібна глибина, а не менеджмент."
+        }
+      },
+      {
+        letter: "В", type: "wrong",
+        text: "Зрозуміло, що конкурент пообіцяв кар'єрний шлях. Але реально — ніхто не може гарантувати такі речі. У нас чесніший підхід: зростання залежить від результатів.",
+        reaction: "«Тобто ви не можете сказати, що мене чекає?» *(насторожена)*",
+        explanation: {
+          h: "АТАКУЄШ КОНКУРЕНТА ЗАМІСТЬ ПРОДАЖУ СЕБЕ",
+          body: "<strong>Ніколи не вигравай через «у конкурента гірше».</strong> Це звучить як виправдання. Кандидат чує: «Ми не можемо дати тобі зрозумілу картину». Фокус — на тому, що є у тебе. Конкретні кейси зростання — твій найсильніший аргумент."
+        }
+      }
+    ]
+  },
+  {
+    id: 4,
+    candidateSays: "Слухай... після нашого фінального інтерв'ю у мене залишилось відчуття певної невизначеності. Ніби я не зовсім зрозуміла, над чим конкретно буде працювати команда в наступні пів року.",
+    options: [
+      {
+        letter: "A", type: "wrong",
+        text: "Дивно, ми ж досить детально розповіли про плани... Може щось пропустила?",
+        reaction: "«Можливо. Але відчуття залишилось.» *(закрилась)*",
+        explanation: {
+          h: "ЗАХИСНА РЕАКЦІЯ",
+          body: "<strong>«Ми ж розповіли» — це звинувачення кандидата</strong>, що вона не слухала. Навіть якщо ти правий — результат один: кандидат закрилась. Коли хтось ділиться занепокоєнням — дякуй за чесність і заповнюй прогалину фактами."
+        }
+      },
+      {
+        letter: "Б", type: "strong",
+        text: "Дякую, що сказала — це важливо. Давай заповню цю прогалину прямо зараз. Наступні 6 місяців: ми релізимо нову мобільну гру, і дизайнер на цій ролі веде весь інтерфейс від прототипу до виходу. Ось конкретно що відбувається по кварталах...",
+        reaction: "«О, так набагато зрозуміліше. Це звучить цікаво — я люблю коли є конкретний продукт і повний цикл.» *(помітно тепліше)*",
+        explanation: {
+          h: "ПОДЯКА + КОНКРЕТИКА",
+          body: "<strong>Ідеальна реакція на занепокоєння.</strong> Спочатку подякував за відкритість — це знімає напругу. Потім одразу закрив прогалину фактами: конкретний проєкт, конкретна роль, конкретний графік. Не «у нас цікаво» — а що саме відбудеться."
+        }
+      },
+      {
+        letter: "В", type: "weak",
+        text: "Розумію твоє відчуття. Я можу відповісти на будь-які питання про плани команди.",
+        reaction: "«Добре... А що саме відбуватиметься в наступні пів року?»",
+        explanation: {
+          h: "ПАСИВНА ВІДПОВІДЬ",
+          body: "<strong>«Можу відповісти на питання» — пасивна позиція.</strong> Кандидат вже сказала про занепокоєння — вона чекала ініціативи від тебе, а не запрошення запитувати. Перехопи ініціативу: одразу розкажи, що конкретно відбудеться, не чекай наступного питання."
+        }
+      }
+    ]
+  },
+  {
+    id: 5,
+    candidateSays: "Дякую за розмову, це було корисно. Мені треба ще трохи подумати. Можу дати відповідь до завтра?",
+    options: [
+      {
+        letter: "A", type: "weak",
+        text: "Звісно, Аня. Жди коли вирішиш. Ми раді тебе бачити в команді!",
+        reaction: "«Добре, дякую.» *(нейтрально, кладе трубку)*",
+        explanation: {
+          h: "НЕМАЄ НАСТУПНОГО КРОКУ",
+          body: "<strong>Ти залишив кандидата наодинці з рішенням.</strong> «Жди» — це не закриття, це очікування. Ти не дізнався, чи є ще якась перешкода. До завтра конкурент може зателефонувати і зробити свій хід."
+        }
+      },
+      {
+        letter: "Б", type: "strong",
+        text: "Звісно, до завтра — не питання. Аня, скажи — є щось конкретне, що тобі ще потрібно вирішити всередині? Чи залишилось якесь питання, де я можу допомогти прямо зараз?",
+        reaction: "«Ні, все питання ти закрив. Просто хочу обміркувати. Думаю, завтра вранці дам відповідь.» *(тепло)*",
+        explanation: {
+          h: "ЗАКРИВ ПЕРЕШКОДУ",
+          body: "<strong>Відмінний фінал.</strong> Ти підтвердив дедлайн і одразу запитав, чи є ще перешкода — не тиснув, але показав, що готовий допомогти. Кандидат відчуває, що ти поряд, а не просто «чекаєш результат». Це і є правильне закриття."
+        }
+      },
+      {
+        letter: "В", type: "wrong",
+        text: "Аня, ми дуже хочемо тебе в команді. Ти ідеальний кандидат для нас. Будь ласка, прийми позитивне рішення!",
+        reaction: "«...Дякую. Подумаю.» *(незручно, хоче закінчити розмову)*",
+        explanation: {
+          h: "ТИСК — НАЙГІРШЕ ЗАКРИТТЯ",
+          body: "<strong>«Будь ласка, прийми позитивне рішення» — це тиск.</strong> Кандидат відчуває, що на неї чинять вплив. Це підриває все, що ти зробив до цього. Сильне закриття — це не прохання і не тиск. Це розуміння чи є ще перешкода, і впевненість без примусу."
+        }
+      }
+    ]
+  }
+];
+
+const RAPPORT_DELTA = { strong: 18, weak: -5, wrong: -15 };
+const OUTCOMES = {
+  high: {
+    type: "accepted",
+    icon: "✓",
+    tag: "ОФЕР ПРИЙНЯТО",
+    title: "Аня прийняла офер наступного ранку",
+    text: "Ти провів розмову правильно: спочатку слухав, потім продавав саме те, що їй важливо. Конкретні приклади зростання і закриття занепокоєння щодо невизначеності переконали її. <strong>Офер прийнято.</strong>"
+  },
+  mid: {
+    type: "followup",
+    icon: "~",
+    tag: "ПОТРІБЕН ДОДАТКОВИЙ КОНТАКТ",
+    title: "Аня попросила ще один день — рішення неочевидне",
+    text: "Кілька ходів були сильними, але були і моменти, де ти загубив контакт. Аня ще розглядає обидва варіанти. <strong>Є шанс закрити — але треба ще один точний хід від рекрутера.</strong>"
+  },
+  low: {
+    type: "declined",
+    icon: "✗",
+    tag: "ОФЕР ВІДХИЛЕНО",
+    title: "Аня обрала інший офер",
+    text: "Розмова не дала їй відчуття, що ти її почув і зрозумів. Кілька відповідей звучали як транзакція або тиск. Для сильного кандидата з альтернативою — цього достатньо щоб обрати інше місце."
+  }
+};
+
+let state = { view: "setup", turn: 0, rapport: 50, answers: [], strongCount: 0 };
+
+function el(id) { return document.getElementById(id); }
+
+function rapportColor(v) {
+  if (v >= 70) return "#2D7A2D";
+  if (v >= 40) return "#F5CE00";
+  return "#C00000";
+}
+
+function render() {
+  el("setupView").classList.toggle("hidden", state.view !== "setup");
+  el("callView").classList.toggle("hidden", state.view !== "call");
+  el("resultsView").classList.toggle("hidden", state.view !== "results");
+  if (state.view === "call") renderCall();
+  if (state.view === "results") renderResults();
+}
+
+function renderCall() {
+  const turn = TURNS[state.turn];
+  const answered = state.answers.find(a => a.turn === state.turn);
+
+  el("progressFill").style.width = `${((state.turn + (answered ? 1 : 0)) / TURNS.length) * 100}%`;
+  el("turnLabel").textContent = `ХІД ${state.turn + 1} З ${TURNS.length}`;
+  el("rapportValue").textContent = `${state.rapport}%`;
+  el("rapportFill").style.width = `${state.rapport}%`;
+  el("rapportFill").style.background = rapportColor(state.rapport);
+
+  el("chatArea").innerHTML = `
+    <div class="candidate-bubble-wrap">
+      <div class="bubble-avatar">АН</div>
+      <div class="bubble-content">
+        <div class="bubble-name">АНЯ КОВАЛЬ</div>
+        <div class="bubble">${turn.candidateSays}</div>
+      </div>
+    </div>
+  `;
+
+  if (!answered) {
+    el("optionsArea").innerHTML = `
+      <div class="options-label">ТВОЯ ВІДПОВІДЬ</div>
+      <div class="options-list">
+        ${turn.options.map(opt => `
+          <button class="option-btn" data-idx="${turn.options.indexOf(opt)}">
+            <span class="option-letter">${opt.letter}</span>
+            <span class="option-text">${opt.text}</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+    document.querySelectorAll(".option-btn").forEach(btn => {
+      btn.addEventListener("click", () => handleChoice(parseInt(btn.dataset.idx)));
+    });
+    el("reactionArea").innerHTML = "";
+    el("nextArea").innerHTML = "";
+  } else {
+    const opt = turn.options[answered.optIdx];
+    el("optionsArea").innerHTML = `
+      <div class="options-label">ТВОЯ ВІДПОВІДЬ</div>
+      <div class="options-list">
+        ${turn.options.map((o, i) => {
+          let cls = "option-btn";
+          if (i === answered.optIdx) cls += ` selected ${o.type}`;
+          else cls += " dim";
+          return `<button class="${cls}" disabled>
+            <span class="option-letter">${o.letter}</span>
+            <span class="option-text">${o.text}</span>
+          </button>`;
+        }).join("")}
+      </div>
+    `;
+
+    el("reactionArea").innerHTML = `
+      <div class="reaction-wrap">
+        <div class="reaction-bubble-wrap">
+          <div class="bubble-avatar" style="width:28px;height:28px;font-size:11px;">АН</div>
+          <div class="reaction-bubble">${opt.reaction}</div>
+        </div>
+        <div class="explanation-block ${opt.type}">
+          <div class="explanation-h">${opt.explanation.h}</div>
+          <div class="explanation-text">${opt.explanation.body}</div>
+        </div>
+      </div>
+    `;
+
+    const isLast = state.turn === TURNS.length - 1;
+    el("nextArea").innerHTML = `
+      <div class="next-row">
+        <button class="btn btn-primary" id="nextBtn">${isLast ? "ПОБАЧИТИ РЕЗУЛЬТАТ →" : "НАСТУПНИЙ ХІД →"}</button>
+      </div>
+    `;
+    el("nextBtn").addEventListener("click", advance);
+  }
+}
+
+function renderResults() {
+  const strong = state.answers.filter(a => a.type === "strong").length;
+  const outcome = strong >= 4 ? OUTCOMES.high : strong >= 2 ? OUTCOMES.mid : OUTCOMES.low;
+
+  el("outcomeArea").innerHTML = `
+    <div class="outcome-card ${outcome.type}">
+      <div class="outcome-icon">${outcome.icon}</div>
+      <div class="outcome-tag">${outcome.tag}</div>
+      <div class="outcome-title">${outcome.title}</div>
+      <div class="outcome-text">${outcome.text}</div>
+    </div>
+  `;
+
+  el("finalScore").innerHTML = `${strong}<span class="score-big-sub">/${TURNS.length}</span>`;
+  el("finalText").textContent = strong >= 4 ? "Фінальний дзвінок проведений правильно. Ти слухав, продавав конкретикою і закрив перешкоди." :
+    strong >= 2 ? "Половина ходів була сильною. Є конкретні моменти, де втрачався контакт." :
+    "Більшість ходів не спрацювали. Подивись на розбір — там ключові причини.";
+
+  const debriefs = TURNS.map((turn, i) => {
+    const ans = state.answers.find(a => a.turn === i);
+    if (!ans) return "";
+    const opt = turn.options[ans.optIdx];
+    return `
+      <div class="debrief-card">
+        <div class="debrief-card-h">Хід ${i + 1}: ${opt.explanation.h}</div>
+        <div class="debrief-card-body">${opt.explanation.body}</div>
+      </div>
+    `;
+  }).join("");
+  el("debriefList").innerHTML = debriefs;
+
+  el("takeawayText").textContent = strong >= 4
+    ? "Офер — це продаж, не доставка. І ти продав правильно: слухав спочатку, продавав конкретикою, а не обіцянками."
+    : strong >= 2
+    ? "Фінальний дзвінок виграється на деталях: реальні приклади замість загальних слів, запитання замість монологу, відкритість замість захисту."
+    : "Кандидат обирає не компанію — вона обирає тебе як майбутнього керівника. Якщо розмова звучить як транзакція, сильний кандидат піде туди, де його почули.";
+}
+
+function handleChoice(optIdx) {
+  const turn = TURNS[state.turn];
+  const opt = turn.options[optIdx];
+  const delta = RAPPORT_DELTA[opt.type] || 0;
+  state.rapport = Math.max(5, Math.min(100, state.rapport + delta));
+  if (opt.type === "strong") state.strongCount++;
+  state.answers.push({ turn: state.turn, optIdx, type: opt.type });
+  render();
+}
+
+function advance() {
+  if (state.turn < TURNS.length - 1) {
+    state.turn++;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } else {
+    state.view = "results";
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}
+
+function reset() {
+  state = { view: "setup", turn: 0, rapport: 50, answers: [], strongCount: 0 };
+  render();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  render();
+  el("startBtn").addEventListener("click", () => { state.view = "call"; render(); });
+  el("restartCallBtn").addEventListener("click", () => { if (confirm("Почати заново?")) reset(); });
+  el("restartResultsBtn").addEventListener("click", reset);
+});
+</script>
+</body>
+</html>
